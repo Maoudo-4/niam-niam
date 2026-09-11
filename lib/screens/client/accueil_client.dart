@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import 'passer_commande.dart';
 import 'mes_commandes.dart';
+import '../../widgets/confirmer_deconnexion.dart';
 
 class AccueilClient extends StatelessWidget {
   const AccueilClient({super.key});
@@ -14,7 +15,7 @@ class AccueilClient extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () => AuthService().deconnecter(),
+            onPressed: () => confirmerDeconnexion(context),
           ),
         ],
       ),

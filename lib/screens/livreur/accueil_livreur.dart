@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import 'missions_disponibles.dart';
 import 'mes_missions.dart';
+import '../../widgets/confirmer_deconnexion.dart';
+
 
 class AccueilLivreur extends StatelessWidget {
   const AccueilLivreur({super.key});
@@ -14,7 +16,7 @@ class AccueilLivreur extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () => AuthService().deconnecter(),
+            onPressed: () => confirmerDeconnexion(context),
           ),
         ],
       ),

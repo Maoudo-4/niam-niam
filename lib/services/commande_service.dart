@@ -48,4 +48,7 @@ class CommandeService {
       'statut': nouveauStatut,
     });
   }
+  Future<void> supprimerCommande(String commandeId) async {
+    await _db.collection('commandes').doc(commandeId).delete();
+  }
 }

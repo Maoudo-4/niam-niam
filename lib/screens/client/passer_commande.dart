@@ -49,17 +49,21 @@ class _PasserCommandeState extends State<PasserCommande> {
               controller: _descriptionController,
               decoration: const InputDecoration(labelText: 'Description de la commande'),
             ),
+            const SizedBox(height: 20),
             TextField(
               controller: _montantController,
               decoration: const InputDecoration(labelText: 'Montant (FCFA)'),
               keyboardType: TextInputType.number,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
             _envoi
                 ? const CircularProgressIndicator()
-                : ElevatedButton(
-                    onPressed: _commander,
-                    child: const Text('Confirmer et payer (simulé)'),
+                : SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _commander,
+                      child: const Text('Confirmer et payer (simulé)'),
+                    ),
                   ),
           ],
         ),
