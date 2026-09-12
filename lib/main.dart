@@ -8,6 +8,8 @@ import 'screens/role_screen.dart';
 import 'screens/client/accueil_client.dart';
 import 'screens/gerant/accueil_gerant.dart';
 import 'screens/livreur/accueil_livreur.dart';
+import 'screens/gerant/creer_etablissement_screen.dart';
+import 'screens/client/liste_etablissements_screen.dart';
 import 'theme.dart';
 
 void main() async {
