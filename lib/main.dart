@@ -10,6 +10,7 @@ import 'screens/gerant/accueil_gerant.dart';
 import 'screens/livreur/accueil_livreur.dart';
 import 'screens/gerant/creer_etablissement_screen.dart';
 import 'screens/client/liste_etablissements_screen.dart';
+import 'theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,8 +28,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'NIAM-NIAM',
       debugShowCheckedModeBanner: false,
-      //home: const ListeEtablissementsScreen(),
-      //home: const TestAjoutEtablissementScreen(),
+      theme: buildAppTheme(),
       home: const RedirectionPrincipale(),
     );
   }

@@ -4,6 +4,7 @@ import '../../services/auth_service.dart';
 import '../../services/etablissement_service.dart';
 import '../../models/etablissement.dart';
 import 'creer_etablissement_screen.dart'; // ton formulaire de création
+import '../../widgets/confirmer_deconnexion.dart';
 
 class AccueilGerant extends StatefulWidget {
   const AccueilGerant({super.key});
@@ -44,7 +45,7 @@ class _AccueilGerantState extends State<AccueilGerant> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () => AuthService().deconnecter(),
+            onPressed: () => confirmerDeconnexion(context),
           ),
         ],
       ),
