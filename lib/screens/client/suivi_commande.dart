@@ -69,28 +69,65 @@ class SuiviCommande extends StatelessWidget {
                     ),
                   ),
                 const SizedBox(height: 24),
+                const Text('Suivi',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.brunTexte)),
+                const SizedBox(height: 12),
                 ...List.generate(StatutCommande.ordre.length, (i) {
-                  final statut = StatutCommande.ordre[i];
-                  final atteinte = i <= etapeActuelle;
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: Row(
-                      children: [
-                        Icon(
-                          atteinte ? Icons.check_circle : Icons.radio_button_unchecked,
-                          color: atteinte ? Colors.green : Colors.grey,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          StatutCommande.libelle(statut),
-                          style: TextStyle(
-                            fontWeight: atteinte ? FontWeight.bold : FontWeight.normal,
+                    final statut = StatutCommande.ordre[i];
+                    final atteinte = i <= etapeActuelle;
+                    final estDernier = i == StatutCommande.ordre.length - 1;
+  
+                    return IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Column(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: atteinte ? AppColors.vert : AppColors.creme,
+                                  border: Border.all(
+                                    color: atteinte ? AppColors.vert : AppColors.bordure,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Icon(
+                                  Icons.circle,
+                                  size: 12,
+                                  color: atteinte ? Colors.white : AppColors.brunClair,
+                                ),
+                              ),
+                              if (!estDernier)
+                                Expanded(
+                                  child: Container(
+                                    width: 2,
+                                    color: atteinte ? AppColors.vert : AppColors.bordure,
+                                  ),
+                                ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
+                          const SizedBox(width: 14),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8, bottom: 24),
+                            child: Text(
+                              StatutCommande.libelle(statut),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: atteinte ? FontWeight.w600 : FontWeight.normal,
+                                color: atteinte ? AppColors.brunTexte : AppColors.brunClair,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
               ],
             ),
           );
