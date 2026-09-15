@@ -8,6 +8,17 @@ class SuiviCommande extends StatelessWidget {
   const SuiviCommande({super.key, required this.commandeId});
 
   @override
+  IconData _icone(String statut) {
+    switch (statut) {
+      case StatutCommande.confirmee: return Icons.receipt_long;
+      case StatutCommande.enPreparation: return Icons.soup_kitchen;
+      case StatutCommande.livreurAssigne: return Icons.person_pin_circle;
+      case StatutCommande.recuperee: return Icons.shopping_bag;
+      case StatutCommande.enRoute: return Icons.delivery_dining;
+      case StatutCommande.livree: return Icons.home;
+      default: return Icons.circle;
+    }
+  }
   Widget build(BuildContext context) {
     final service = CommandeService();
 
@@ -97,9 +108,9 @@ class SuiviCommande extends StatelessWidget {
                                     width: 2,
                                   ),
                                 ),
-                                child: Icon(
-                                  Icons.circle,
-                                  size: 12,
+                                 child: Icon(
+                                  _icone(statut),
+                                  size: 18,
                                   color: atteinte ? Colors.white : AppColors.brunClair,
                                 ),
                               ),
