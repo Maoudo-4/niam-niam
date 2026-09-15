@@ -42,21 +42,40 @@ class _PasserCommandeState extends State<PasserCommande> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Passer une commande')),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _descriptionController,
-              decoration: const InputDecoration(labelText: 'Description de la commande'),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _montantController,
-              decoration: const InputDecoration(labelText: 'Montant (FCFA)'),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 32),
+        body: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Détails de la commande',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.brunTexte)),
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.carte,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.bordure),
+                ),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _descriptionController,
+                      decoration: const InputDecoration(labelText: 'Description de la commande'),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _montantController,
+                      decoration: const InputDecoration(labelText: 'Montant (FCFA)'),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
             _envoi
                 ? const CircularProgressIndicator()
                 : SizedBox(
