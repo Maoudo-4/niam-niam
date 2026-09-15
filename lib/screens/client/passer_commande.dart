@@ -75,16 +75,43 @@ class _PasserCommandeState extends State<PasserCommande> {
                   ],
                 ),
               ),
-              const SizedBox(height: 32),
-            _envoi
-                ? const CircularProgressIndicator()
-                : SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _commander,
-                      child: const Text('Confirmer et payer (simulé)'),
-                    ),
+            const Spacer(),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.carte,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.bordure),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Total',
+                          style: TextStyle(fontSize: 12, color: AppColors.brunClair)),
+                      Text(
+                        '${double.tryParse(_montantController.text)?.toStringAsFixed(0) ?? '0'} FCFA',
+                        style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.brunTexte),
+                      ),
+                    ],
                   ),
+                  SizedBox(
+                    width: 180,
+                    child: _envoi
+                        ? const Center(child: CircularProgressIndicator())
+                        : ElevatedButton(
+                            onPressed: _commander,
+                            child: const Text('Payer (simulé)'),
+                          ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
