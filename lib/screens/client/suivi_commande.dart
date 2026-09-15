@@ -79,7 +79,7 @@ class SuiviCommande extends StatelessWidget {
                     final statut = StatutCommande.ordre[i];
                     final atteinte = i <= etapeActuelle;
                     final estDernier = i == StatutCommande.ordre.length - 1;
-  
+
                     return IntrinsicHeight(
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,6 +128,35 @@ class SuiviCommande extends StatelessWidget {
                       ),
                     );
                   }),
+
+                if (commande.livreurId != null) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: AppColors.carte,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.bordure),
+                    ),
+                    child: const Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 22,
+                          backgroundColor: AppColors.creme,
+                          child: Icon(Icons.person, color: AppColors.terracotta),
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Text('Ton livreur',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.brunTexte)),
+                        ),
+                        Icon(Icons.call, color: AppColors.vert),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           );
