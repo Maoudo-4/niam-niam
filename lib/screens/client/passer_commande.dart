@@ -20,7 +20,7 @@ class _PasserCommandeState extends State<PasserCommande> {
   int _quantite = 1;
   bool _envoi = false;
 
-  Future<void> _commander() async {
+    Future<void> _commander() async {
     if (_produitChoisi == null) return;
 
     setState(() => _envoi = true);
@@ -29,8 +29,8 @@ class _PasserCommandeState extends State<PasserCommande> {
     final commandeId = await _service.creerCommande(
       clientId: uid,
       etablissementId: _produitChoisi!.etablissementId,
-      description: '${_produitChoisi!.nom} x1',
-      montant: _produitChoisi!.prix,
+      description: '${_produitChoisi!.nom} x$_quantite',
+      montant: _produitChoisi!.prix * _quantite,
     );
 
     setState(() => _envoi = false);
