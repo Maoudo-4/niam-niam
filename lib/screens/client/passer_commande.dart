@@ -64,19 +64,27 @@ class _PasserCommandeState extends State<PasserCommande> {
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppColors.bordure),
                 ),
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: _descriptionController,
-                      decoration: const InputDecoration(labelText: 'Description de la commande'),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _montantController,
-                      decoration: const InputDecoration(labelText: 'Montant (FCFA)'),
-                      keyboardType: TextInputType.number,
-                    ),
-                  ],
+                child: StreamBuilder<List<Produit>>(
+                  stream: _produitService.produitsDisponibles(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final produits = snapshot.data!
+                        .where((p) => p.categorie != 'maiga')
+                        .toList();
+                    return DropdownButtonFormField<Produit>(
+                      decoration: const InputDecoration(labelText: 'Choisir un plat'),
+                      value: _produitChoisi,
+                      items: produits.map((p) {
+                        return DropdownMenuItem(
+                          value: p,
+                          child: Text('${p.nom} — ${p.prix.toStringAsFixed(0)} FCFA'),
+                        );
+                      }).toList(),
+                      onChanged: (p) => setState(() => _produitChoisi = p),
+                    );
+                  },
                 ),
               ),
             const Spacer(),
@@ -96,7 +104,7 @@ class _PasserCommandeState extends State<PasserCommande> {
                       const Text('Total',
                           style: TextStyle(fontSize: 12, color: AppColors.brunClair)),
                       Text(
-                        '${double.tryParse(_montantController.text)?.toStringAsFixed(0) ?? '0'} FCFA',
+                        '${_produitChoisi?.prix.toStringAsFixed(0) ?? '0'} FCFA',
                         style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w700,
