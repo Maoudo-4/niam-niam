@@ -87,7 +87,37 @@ class _PasserCommandeState extends State<PasserCommande> {
                     );
                   },
                 ),
+                          ),
+            if (_produitChoisi != null) ...[
+              const SizedBox(height: 20),
+              const Text('Quantité',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.brunTexte)),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: _quantite > 1
+                        ? () => setState(() => _quantite--)
+                        : null,
+                    icon: const Icon(Icons.remove_circle_outline),
+                    color: AppColors.terracotta,
+                  ),
+                  Text('$_quantite',
+                      style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.brunTexte)),
+                  IconButton(
+                    onPressed: () => setState(() => _quantite++),
+                    icon: const Icon(Icons.add_circle_outline),
+                    color: AppColors.vert,
+                  ),
+                ],
               ),
+            ],
             const Spacer(),
             Container(
               padding: const EdgeInsets.all(16),
