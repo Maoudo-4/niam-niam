@@ -1,7 +1,7 @@
 class Etablissement {
   final String id;
   final String nom;
-  final String type; // 'restaurant', 'fast-food', 'mega'
+  final String type; // 'restaurant', 'fast-food', 'maiga'
   final String description;
   final String adresse;
   final double latitude;
