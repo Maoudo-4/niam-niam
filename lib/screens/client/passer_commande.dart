@@ -134,8 +134,8 @@ class _PasserCommandeState extends State<PasserCommande> {
                     children: [
                       const Text('Total',
                           style: TextStyle(fontSize: 12, color: AppColors.brunClair)),
-                      Text(
-                        '${_produitChoisi?.prix.toStringAsFixed(0) ?? '0'} FCFA',
+                       Text(
+                        '${((_produitChoisi?.prix ?? 0) * _quantite).toStringAsFixed(0)} FCFA',
                         style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w700,
