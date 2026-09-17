@@ -15,19 +15,21 @@ class PasserCommande extends StatefulWidget {
 
 class _PasserCommandeState extends State<PasserCommande> {
   final _service = CommandeService();
-  final _descriptionController = TextEditingController(text: 'Thiéboudienne x1');
-  final _montantController = TextEditingController(text: '2500');
+  final _produitService = ProduitService();
+  Produit? _produitChoisi;
   bool _envoi = false;
 
   Future<void> _commander() async {
+    if (_produitChoisi == null) return;
+
     setState(() => _envoi = true);
     final uid = FirebaseAuth.instance.currentUser!.uid;
 
     final commandeId = await _service.creerCommande(
       clientId: uid,
-      etablissementId: 'etablissement_test', // en dur pour l'instant
-      description: _descriptionController.text.trim(),
-      montant: double.tryParse(_montantController.text) ?? 0,
+      etablissementId: _produitChoisi!.etablissementId,
+      description: '${_produitChoisi!.nom} x1',
+      montant: _produitChoisi!.prix,
     );
 
     setState(() => _envoi = false);
