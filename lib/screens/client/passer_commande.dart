@@ -17,6 +17,7 @@ class _PasserCommandeState extends State<PasserCommande> {
   final _service = CommandeService();
   final _produitService = ProduitService();
   Produit? _produitChoisi;
+  int _quantite = 1;
   bool _envoi = false;
 
   Future<void> _commander() async {
