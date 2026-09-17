@@ -22,4 +22,11 @@ class Produit {
       categorie: map['categorie'] ?? '',
     );
   }
+
+  @override
+  bool operator ==(Object other) => other is Produit && other.id == id;
+
+  @override
+  int get hashCode => id.hashCode;
+
 }
