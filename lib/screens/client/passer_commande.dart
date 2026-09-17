@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../models/produit.dart';
+import '../../services/produit_service.dart';
 import '../../theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/commande_service.dart';
