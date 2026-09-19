@@ -4,6 +4,9 @@ import '../../theme.dart';
 import 'passer_commande.dart';
 import 'mes_commandes.dart';
 import '../../widgets/confirmer_deconnexion.dart';
+import '../../models/etablissement.dart';
+import '../../services/etablissement_service.dart';
+import '../../widgets/carte_etablissement.dart';
 
 class AccueilClient extends StatelessWidget {
   const AccueilClient({super.key});
@@ -48,7 +51,36 @@ class AccueilClient extends StatelessWidget {
               ],
             ),
 
-            // Les autres sections (Top Restaurants, Top Fast Food) arrivent aux prochaines étapes
+              const SizedBox(height: 28),
+              const Text('Top Restaurants',
+                  style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.brunTexte)),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 170,
+                child: StreamBuilder<List<Etablissement>>(
+                  stream: EtablissementService().getEtablissements(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final restaurants = snapshot.data!
+                        .where((e) => e.type == 'restaurant')
+                        .toList();
+                    if (restaurants.isEmpty) {
+                      return const Center(child: Text('Aucun restaurant pour le moment'));
+                    }
+                    return ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: restaurants
+                          .map((e) => CarteEtablissement(etablissement: e))
+                          .toList(),
+                    );
+                  },
+                ),
+              ),
 
             const SizedBox(height: 24),
             ElevatedButton(
