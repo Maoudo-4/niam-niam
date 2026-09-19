@@ -98,7 +98,53 @@ class AccueilClient extends StatelessWidget {
                   },
                 ),
               ),
-
+              const SizedBox(height: 28),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Top Fast Food',
+                      style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.brunTexte)),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ListeEtablissementsScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text('Voir tout',
+                        style: TextStyle(fontSize: 13, color: AppColors.vert)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 170,
+                child: StreamBuilder<List<Etablissement>>(
+                  stream: EtablissementService().getEtablissements(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final fastfoods = snapshot.data!
+                        .where((e) => e.type == 'fast-food')
+                        .toList();
+                    if (fastfoods.isEmpty) {
+                      return const Center(child: Text('Aucun fast-food pour le moment'));
+                    }
+                    return ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: fastfoods
+                          .map((e) => CarteEtablissement(etablissement: e))
+                          .toList(),
+                    );
+                  },
+                ),
+              ),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () {
