@@ -24,6 +24,43 @@ class AccueilClient extends StatelessWidget {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // TODO: recherche des établissements à proximité (à construire)
+        },
+        backgroundColor: AppColors.terracotta,
+        child: const Icon(Icons.location_searching, color: Colors.white),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8,
+        color: AppColors.carte,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.home, color: AppColors.terracotta),
+              onPressed: () {},
+            ),
+            IconButton(
+              icon: const Icon(Icons.storefront, color: AppColors.brunClair),
+              onPressed: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const ListeEtablissementsScreen())),
+            ),
+            const SizedBox(width: 40), // espace pour le bouton flottant
+            IconButton(
+              icon: const Icon(Icons.receipt_long, color: AppColors.brunClair),
+              onPressed: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const MesCommandes())),
+            ),
+            IconButton(
+              icon: const Icon(Icons.person, color: AppColors.brunClair),
+              onPressed: () {},
+            ),
+          ],
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
