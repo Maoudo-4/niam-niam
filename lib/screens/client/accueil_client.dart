@@ -7,6 +7,7 @@ import '../../widgets/confirmer_deconnexion.dart';
 import '../../models/etablissement.dart';
 import '../../services/etablissement_service.dart';
 import '../../widgets/carte_etablissement.dart';
+import 'liste_etablissements_screen.dart';
 
 class AccueilClient extends StatelessWidget {
   const AccueilClient({super.key});
@@ -51,12 +52,28 @@ class AccueilClient extends StatelessWidget {
               ],
             ),
 
-              const SizedBox(height: 28),
-              const Text('Top Restaurants',
-                  style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.brunTexte)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Top Restaurants',
+                      style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.brunTexte)),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ListeEtablissementsScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text('Voir tout',
+                        style: TextStyle(fontSize: 13, color: AppColors.vert)),
+                  ),
+                ],
+              ),
               const SizedBox(height: 12),
               SizedBox(
                 height: 170,
