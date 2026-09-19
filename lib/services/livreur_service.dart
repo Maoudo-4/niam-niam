@@ -1,8 +1,28 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/commande.dart';
+import '../models/livreur.dart'; // ⬅️ NOUVEAU
 
 class LivreurService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+
+  // profil livreur (collection 'livreurs', ID = uid)
+  CollectionReference<Map<String, dynamic>> get _livreurs =>
+      _db.collection('livreurs');
+
+  Future<void> creerProfil(Livreur livreur) async {
+    await _livreurs.doc(livreur.uid).set(livreur.toMap());
+  }
+
+  Future<Livreur?> getProfil(String uid) async {
+    final doc = await _livreurs.doc(uid).get();
+    if (!doc.exists) return null;
+    return Livreur.fromMap(doc.data()!, uid);
+  }
+
+  Future<bool> profilExiste(String uid) async {
+    final doc = await _livreurs.doc(uid).get();
+    return doc.exists;
+  }
 
   // Missions disponibles : en préparation, sans livreur assigné
   Stream<List<Commande>> missionsDisponibles() {

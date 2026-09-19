@@ -11,6 +11,9 @@ import 'screens/livreur/accueil_livreur.dart';
 import 'screens/gerant/creer_etablissement_screen.dart';
 import 'screens/client/liste_etablissements_screen.dart';
 import 'theme.dart';
+import 'screens/client/redirection_client.dart';
+import 'screens/livreur/redirection_livreur.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,11 +71,11 @@ class RedirectionPrincipale extends StatelessWidget {
             if (role == '') {
               return RoleScreen(uid: uid); // pas encore de rôle choisi
             } else if (role == 'client') {
-              return const AccueilClient();
+              return RedirectionClient(uid: uid);   // avant : const AccueilClient()
             } else if (role == 'gerant') {
               return const AccueilGerant();
             } else if (role == 'livreur') {
-              return const AccueilLivreur();
+              return RedirectionLivreur(uid: uid);   // avant : const AccueilLivreur()
             } else {
               return RoleScreen(uid: uid);
             }
