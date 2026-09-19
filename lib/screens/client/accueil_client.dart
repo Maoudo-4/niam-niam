@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
+import '../../theme.dart';
 import 'passer_commande.dart';
 import 'mes_commandes.dart';
 import '../../widgets/confirmer_deconnexion.dart';
@@ -11,7 +12,7 @@ class AccueilClient extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Accueil Client'),
+        title: const Text('NIAM-NIAM'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -19,10 +20,37 @@ class AccueilClient extends StatelessWidget {
           ),
         ],
       ),
-      body: Center(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Text('Qu\'est-ce qu\'on mange aujourd\'hui ?',
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.brunTexte)),
+            const SizedBox(height: 20),
+
+            const Text('Catégories',
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.brunTexte)),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                _CategoriePastille(icone: Icons.restaurant, label: 'Restaurant'),
+                const SizedBox(width: 12),
+                _CategoriePastille(icone: Icons.lunch_dining, label: 'Fast-food'),
+                const SizedBox(width: 12),
+                _CategoriePastille(icone: Icons.storefront, label: 'Maïga'),
+              ],
+            ),
+
+            // Les autres sections (Top Restaurants, Top Fast Food) arrivent aux prochaines étapes
+
+            const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -32,7 +60,7 @@ class AccueilClient extends StatelessWidget {
               },
               child: const Text('Passer une commande (test)'),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -42,6 +70,33 @@ class AccueilClient extends StatelessWidget {
               },
               child: const Text('Mes commandes'),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CategoriePastille extends StatelessWidget {
+  final IconData icone;
+  final String label;
+  const _CategoriePastille({required this.icone, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: AppColors.carte,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.bordure),
+        ),
+        child: Column(
+          children: [
+            Icon(icone, color: AppColors.terracotta, size: 22),
+            const SizedBox(height: 6),
+            Text(label, style: const TextStyle(fontSize: 12, color: AppColors.brunTexte)),
           ],
         ),
       ),
