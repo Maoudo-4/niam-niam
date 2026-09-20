@@ -4,6 +4,7 @@ import 'accueil_page.dart';
 import 'client/liste_etablissements_screen.dart';
 import 'client/mes_commandes.dart';
 import 'livreur/missions_page.dart';
+import 'gerant/profil_gerant_page.dart';
 
 /// Les trois rôles de l'appli.
 enum RoleUtilisateur { client, gerant, livreur }
@@ -22,11 +23,16 @@ class _CoquePrincipaleState extends State<CoquePrincipale> {
 
   // L'onglet Commandes est la seule page qui change selon le rôle.
   Widget _pageCommandes() => switch (widget.role) {
-        RoleUtilisateur.client => const MesCommandes(),
-        RoleUtilisateur.gerant =>
-          const _PagePlaceholder(titre: 'Commandes reçues'),
-        RoleUtilisateur.livreur => const MissionsPage(),
-      };
+    RoleUtilisateur.client => const MesCommandes(),
+    RoleUtilisateur.gerant =>
+      const _PagePlaceholder(titre: 'Commandes reçues'),
+    RoleUtilisateur.livreur => const MissionsPage(),
+  };
+    // Onglet Profil : provisoire, seul le gérant a une vraie page pour l'instant
+  Widget _pageProfil() => switch (widget.role) {
+    RoleUtilisateur.gerant => const ProfilGerantPage(),
+    _ => const _PagePlaceholder(titre: 'Profil'),
+  };
 
   Widget _itemNav(IconData icone, int index) {
     final actif = _index == index;
@@ -52,20 +58,23 @@ class _CoquePrincipaleState extends State<CoquePrincipale> {
           ),
           const ListeEtablissementsScreen(),
           _pageCommandes(),
-          const _PagePlaceholder(titre: 'Profil'),
+          _pageProfil(),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: carte des établissements à proximité (à construire)
-        },
-        backgroundColor: AppColors.terracotta,
-        child: const Icon(Icons.location_searching, color: Colors.white),
+        floatingActionButton: FloatingActionButton.small(
+          onPressed: () {
+            // TODO: carte des établissements à proximité (à construire)
+          },
+          backgroundColor: AppColors.terracotta,
+          child: const Icon(Icons.location_searching,
+              color: Colors.white, size: 20),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
+        height: 50,
+        padding: EdgeInsets.zero,
         shape: const CircularNotchedRectangle(),
-        notchMargin: 8,
+        notchMargin: 4,
         color: AppColors.carte,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,

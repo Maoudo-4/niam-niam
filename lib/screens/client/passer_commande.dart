@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../models/etablissement.dart';
 import '../../models/produit.dart';
+import '../../services/commande_service.dart';
 import '../../services/produit_service.dart';
 import '../../theme.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../../services/commande_service.dart';
 import 'suivi_commande.dart';
 
 class PasserCommande extends StatefulWidget {
-  const PasserCommande({super.key});
+  final Etablissement etablissement;
+  const PasserCommande({super.key, required this.etablissement});
 
   @override
   State<PasserCommande> createState() => _PasserCommandeState();
@@ -20,7 +22,7 @@ class _PasserCommandeState extends State<PasserCommande> {
   int _quantite = 1;
   bool _envoi = false;
 
-    Future<void> _commander() async {
+  Future<void> _commander() async {
     if (_produitChoisi == null) return;
 
     setState(() => _envoi = true);
@@ -33,61 +35,68 @@ class _PasserCommandeState extends State<PasserCommande> {
       montant: _produitChoisi!.prix * _quantite,
     );
 
+    if (!mounted) return;
     setState(() => _envoi = false);
 
-    if (mounted) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => SuiviCommande(commandeId: commandeId)),
-      );
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => SuiviCommande(commandeId: commandeId)),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Passer une commande')),
-        body: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Détails de la commande',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.brunTexte)),
-              const SizedBox(height: 14),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.carte,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.bordure),
-                ),
-                child: StreamBuilder<List<Produit>>(
-                  stream: _produitService.produitsDisponibles(),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    final produits = snapshot.data!
-                        .where((p) => p.categorie != 'maiga')
-                        .toList();
-                    return DropdownButtonFormField<Produit>(
-                      decoration: const InputDecoration(labelText: 'Choisir un plat'),
-                      value: _produitChoisi,
-                      items: produits.map((p) {
-                        return DropdownMenuItem(
-                          value: p,
-                          child: Text('${p.nom} — ${p.prix.toStringAsFixed(0)} FCFA'),
-                        );
-                      }).toList(),
-                      onChanged: (p) => setState(() => _produitChoisi = p),
-                    );
-                  },
-                ),
-                          ),
+      appBar: AppBar(title: Text('Commander chez ${widget.etablissement.nom}')),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Détails de la commande',
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.brunTexte)),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.carte,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.bordure),
+              ),
+              child: StreamBuilder<List<Produit>>(
+                stream: _produitService.produitsDisponibles(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  // Seulement les plats de CET établissement
+                  final produits = snapshot.data!
+                      .where((p) =>
+                          p.categorie != 'maiga' &&
+                          p.etablissementId == widget.etablissement.id)
+                      .toList();
+                  if (produits.isEmpty) {
+                    return const Text('Aucun plat disponible pour le moment');
+                  }
+                  return DropdownButtonFormField<Produit>(
+                    decoration:
+                        const InputDecoration(labelText: 'Choisir un plat'),
+                    value: _produitChoisi,
+                    items: produits.map((p) {
+                      return DropdownMenuItem(
+                        value: p,
+                        child: Text(
+                            '${p.nom} — ${p.prix.toStringAsFixed(0)} FCFA'),
+                      );
+                    }).toList(),
+                    onChanged: (p) => setState(() => _produitChoisi = p),
+                  );
+                },
+              ),
+            ),
             if (_produitChoisi != null) ...[
               const SizedBox(height: 20),
               const Text('Quantité',
@@ -133,8 +142,9 @@ class _PasserCommandeState extends State<PasserCommande> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text('Total',
-                          style: TextStyle(fontSize: 12, color: AppColors.brunClair)),
-                       Text(
+                          style: TextStyle(
+                              fontSize: 12, color: AppColors.brunClair)),
+                      Text(
                         '${((_produitChoisi?.prix ?? 0) * _quantite).toStringAsFixed(0)} FCFA',
                         style: const TextStyle(
                             fontSize: 20,
