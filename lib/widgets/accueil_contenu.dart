@@ -3,7 +3,8 @@ import '../theme.dart';
 import 'section_top.dart';
 
 class AccueilContenu extends StatelessWidget {
-  final VoidCallback onVoirTout;
+  // Reçoit le type de la section dont on a cliqué « Voir tout » ('restaurant' ou 'fast-food')
+  final ValueChanged<String> onVoirTout;
   const AccueilContenu({super.key, required this.onVoirTout});
 
   @override
@@ -39,14 +40,14 @@ class AccueilContenu extends StatelessWidget {
           titre: 'Top Restaurants',
           type: 'restaurant',
           messageVide: 'Aucun restaurant pour le moment',
-          onVoirTout: onVoirTout,
+          onVoirTout: () => onVoirTout('restaurant'),
         ),
         const SizedBox(height: 28),
         SectionTop(
           titre: 'Top Fast Food',
           type: 'fast-food',
           messageVide: 'Aucun fast-food pour le moment',
-          onVoirTout: onVoirTout,
+          onVoirTout: () => onVoirTout('fast-food'),
         ),
       ],
     );
