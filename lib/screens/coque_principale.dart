@@ -3,6 +3,7 @@ import '../theme.dart';
 import 'accueil_page.dart';
 import 'client/liste_etablissements_screen.dart';
 import 'client/mes_commandes.dart';
+import 'livreur/missions_page.dart';
 
 /// Les trois rôles de l'appli.
 enum RoleUtilisateur { client, gerant, livreur }
@@ -24,7 +25,7 @@ class _CoquePrincipaleState extends State<CoquePrincipale> {
         RoleUtilisateur.client => const MesCommandes(),
         RoleUtilisateur.gerant =>
           const _PagePlaceholder(titre: 'Commandes reçues'),
-        RoleUtilisateur.livreur => const _PagePlaceholder(titre: 'Missions'),
+        RoleUtilisateur.livreur => const MissionsPage(),
       };
 
   Widget _itemNav(IconData icone, int index) {
