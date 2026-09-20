@@ -4,14 +4,21 @@ import '../../services/etablissement_service.dart';
 import 'fiche_etablissement_screen.dart';
 
 class ListeEtablissementsScreen extends StatelessWidget {
-  const ListeEtablissementsScreen({super.key});
+  final String? type; // null = tous les établissements
+  const ListeEtablissementsScreen({super.key, this.type});
+
+  String get _titre => switch (type) {
+        'restaurant' => 'Restaurants',
+        'fast-food' => 'Fast-foods',
+        _ => 'Établissements',
+      };
 
   @override
   Widget build(BuildContext context) {
     final EtablissementService service = EtablissementService();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Établissements')),
+      appBar: AppBar(title: Text(_titre)),
       body: StreamBuilder<List<Etablissement>>(
         stream: service.getEtablissements(),
         builder: (context, snapshot) {
@@ -23,7 +30,9 @@ class ListeEtablissementsScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final etablissements = snapshot.data ?? [];
+          final etablissements = (snapshot.data ?? [])
+              .where((e) => type == null || e.type == type)
+              .toList();
 
           if (etablissements.isEmpty) {
             return const Center(child: Text('Aucun établissement pour le moment'));

@@ -1,13 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/etablissement.dart';
+import 'passer_commande.dart';
 
-class FicheEtablissementScreen extends StatelessWidget {
+class FicheEtablissementScreen extends StatefulWidget {
   final Etablissement etablissement;
 
   const FicheEtablissementScreen({super.key, required this.etablissement});
 
   @override
+  State<FicheEtablissementScreen> createState() =>
+      _FicheEtablissementScreenState();
+}
+
+class _FicheEtablissementScreenState extends State<FicheEtablissementScreen> {
+  bool _estClient = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _chargerRole();
+  }
+
+  // Le bouton Commander n'est visible que pour les clients
+  Future<void> _chargerRole() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+    try {
+      final doc =
+          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      if (!mounted) return;
+      setState(() => _estClient = doc.data()?['role'] == 'client');
+    } catch (_) {
+      // Erreur réseau : on n'affiche simplement pas le bouton
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final etablissement = widget.etablissement;
+
     return Scaffold(
       appBar: AppBar(title: Text(etablissement.nom)),
       body: SingleChildScrollView(
@@ -76,20 +109,27 @@ class FicheEtablissementScreen extends StatelessWidget {
                       Expanded(child: Text(etablissement.adresse)),
                     ],
                   ),
+
+                  // Espace pour que le bouton flottant ne cache pas l'adresse
+                  const SizedBox(height: 80),
                 ],
               ),
             ),
           ],
         ),
       ),
-      // Bouton flottant pour la suite (commande/réservation - branche de Maoudo)
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // TODO: Maoudo branchera feature/commande ici
-        },
-        label: const Text('Commander'),
-        icon: const Icon(Icons.shopping_cart),
-      ),
+      floatingActionButton: _estClient
+          ? FloatingActionButton.extended(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PasserCommande(etablissement: etablissement),
+                ),
+              ),
+              label: const Text('Commander'),
+              icon: const Icon(Icons.shopping_cart),
+            )
+          : null,
     );
   }
 }

@@ -14,4 +14,24 @@ class ProduitService {
         .map((doc) => Produit.fromMap(doc.id, doc.data() as Map<String, dynamic>))
         .toList());
   }
+
+  // Le gérant publie un plat dans son établissement
+  Future<void> ajouterProduit({
+    required String etablissementId,
+    required String nom,
+    required double prix,
+    required String categorie,
+  }) async {
+    await _db.collection('produits').add({
+      'etablissementId': etablissementId,
+      'nom': nom,
+      'prix': prix,
+      'categorie': categorie,
+    });
+  }
+
+  // Retire un plat de la liste
+  Future<void> supprimerProduit(String produitId) async {
+    await _db.collection('produits').doc(produitId).delete();
+  }
 }
