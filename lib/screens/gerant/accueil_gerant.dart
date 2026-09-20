@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../services/auth_service.dart';
 import '../../services/etablissement_service.dart';
 import '../../models/etablissement.dart';
-import 'creer_etablissement_screen.dart'; // ton formulaire de création
+import 'creer_etablissement_screen.dart';
 import '../../widgets/confirmer_deconnexion.dart';
+import '../coque_principale.dart';
 
 class AccueilGerant extends StatefulWidget {
   const AccueilGerant({super.key});
@@ -28,39 +28,42 @@ class _AccueilGerantState extends State<AccueilGerant> {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid != null) {
       final etab = await _service.getEtablissementParProprietaire(uid);
+      if (!mounted) return;
       setState(() {
         _monEtablissement = etab;
         _chargement = false;
       });
     } else {
+      if (!mounted) return;
       setState(() => _chargement = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Accueil Gérant'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => confirmerDeconnexion(context),
-          ),
-        ],
-      ),
-      body: _chargement
-          ? const Center(child: CircularProgressIndicator())
-          : _monEtablissement == null
-              ? CreerEtablissementScreen(
-                  onEtablissementCree: _verifierEtablissement,
-                )
-              : Center(
-                  child: Text(
-                    'Bienvenue, ${_monEtablissement!.nom} 👋',
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                ),
-    );
+    if (_chargement) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    // Pas encore d'établissement : formulaire de création (comme avant)
+    if (_monEtablissement == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Accueil Gérant'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () => confirmerDeconnexion(context),
+            ),
+          ],
+        ),
+        body: CreerEtablissementScreen(
+          onEtablissementCree: _verifierEtablissement,
+        ),
+      );
+    }
+
+    // Établissement créé : même interface que le client, rôle gérant
+    return const CoquePrincipale(role: RoleUtilisateur.gerant);
   }
 }
