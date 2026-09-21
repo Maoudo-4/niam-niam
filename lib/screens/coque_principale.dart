@@ -6,6 +6,7 @@ import 'client/mes_commandes.dart';
 import 'livreur/missions_page.dart';
 import 'gerant/profil_gerant_page.dart';
 import 'client/profil_client_page.dart';
+import 'livreur/profil_livreur_page.dart';
 
 /// Les trois rôles de l'appli.
 enum RoleUtilisateur { client, gerant, livreur }
@@ -29,11 +30,12 @@ class _CoquePrincipaleState extends State<CoquePrincipale> {
       const _PagePlaceholder(titre: 'Commandes reçues'),
     RoleUtilisateur.livreur => const MissionsPage(),
   };
-    // Onglet Profil : provisoire, seul le gérant a une vraie page pour l'instant
+  
+  // Onglet Profil : provisoire, seul le gérant a une vraie page pour l'instant
   Widget _pageProfil() => switch (widget.role) {
     RoleUtilisateur.client => const ProfilClientPage(),
     RoleUtilisateur.gerant => const ProfilGerantPage(),
-    _ => const _PagePlaceholder(titre: 'Profil'),
+    RoleUtilisateur.livreur => const ProfilLivreurPage(),
   };
 
   Widget _itemNav(IconData icone, int index) {
