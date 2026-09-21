@@ -10,6 +10,7 @@ class ListeEtablissementsScreen extends StatelessWidget {
   String get _titre => switch (type) {
         'restaurant' => 'Restaurants',
         'fast-food' => 'Fast-foods',
+        'maïga' => 'Maïgas',
         _ => 'Établissements',
       };
 
