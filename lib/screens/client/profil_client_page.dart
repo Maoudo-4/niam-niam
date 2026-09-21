@@ -7,6 +7,7 @@ import '../../widgets/confirmer_deconnexion.dart';
 import 'modifier_profil_client_screen.dart';
 import 'changer_mot_de_passe_screen.dart';
 import 'favoris_client_page.dart';
+import 'historique_commandes_page.dart';
 
 /// Onglet Profil du client : en-tête + menu « Mon compte ».
 class ProfilClientPage extends StatefulWidget {
@@ -198,8 +199,12 @@ class _ProfilClientPageState extends State<ProfilClientPage> {
                           child: _LigneMenu(
                             icone: Icons.receipt_long,
                             titre: 'Historique des commandes',
-                            onTap: () =>
-                                _ouvrirBientot('Historique des commandes'),
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) =>
+                                      const HistoriqueCommandesPage()),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 12),

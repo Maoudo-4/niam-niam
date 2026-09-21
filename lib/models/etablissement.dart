@@ -6,7 +6,7 @@ class Etablissement {
   final String adresse;
   final double latitude;
   final double longitude;
-  final String categoriePrix; // '€', '€€', '€€€'
+  final String categoriePrix; // 'F', 'FF', 'FFF'
   final String photoUrl;
   final double noteMoyenne;
   final int nombreAvis;
@@ -37,7 +37,7 @@ class Etablissement {
       adresse: map['adresse'] ?? '',
       latitude: (map['latitude'] ?? 0.0).toDouble(),
       longitude: (map['longitude'] ?? 0.0).toDouble(),
-      categoriePrix: map['categoriePrix'] ?? '€',
+      categoriePrix: map['categoriePrix'] ?? 'F',
       photoUrl: map['photoUrl'] ?? '',
       noteMoyenne: (map['noteMoyenne'] ?? 0.0).toDouble(),
       nombreAvis: map['nombreAvis'] ?? 0,
