@@ -6,6 +6,7 @@ import '../../theme.dart';
 import '../../widgets/confirmer_deconnexion.dart';
 import 'modifier_profil_client_screen.dart';
 import 'changer_mot_de_passe_screen.dart';
+import 'favoris_client_page.dart';
 
 /// Onglet Profil du client : en-tête + menu « Mon compte ».
 class ProfilClientPage extends StatefulWidget {
@@ -206,7 +207,11 @@ class _ProfilClientPageState extends State<ProfilClientPage> {
                           child: _LigneMenu(
                             icone: Icons.favorite_border,
                             titre: 'Mes favoris',
-                            onTap: () => _ouvrirBientot('Mes favoris'),
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const FavorisClientPage()),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 12),
