@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme.dart';
 import '../../models/commande.dart';
 import '../../services/commande_service.dart';
 
@@ -7,6 +8,17 @@ class SuiviCommande extends StatelessWidget {
   const SuiviCommande({super.key, required this.commandeId});
 
   @override
+  IconData _icone(String statut) {
+    switch (statut) {
+      case StatutCommande.confirmee: return Icons.receipt_long;
+      case StatutCommande.enPreparation: return Icons.soup_kitchen;
+      case StatutCommande.livreurAssigne: return Icons.person_pin_circle;
+      case StatutCommande.recuperee: return Icons.shopping_bag;
+      case StatutCommande.enRoute: return Icons.delivery_dining;
+      case StatutCommande.livree: return Icons.home;
+      default: return Icons.circle;
+    }
+  }
   Widget build(BuildContext context) {
     final service = CommandeService();
 
@@ -27,31 +39,135 @@ class SuiviCommande extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(commande.description, style: const TextStyle(fontSize: 18)),
-                Text('${commande.montant.toStringAsFixed(0)} FCFA'),
-                const SizedBox(height: 24),
-                ...List.generate(StatutCommande.ordre.length, (i) {
-                  final statut = StatutCommande.ordre[i];
-                  final atteinte = i <= etapeActuelle;
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
+                  Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: AppColors.carte,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.bordure),
+                    ),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Icon(
-                          atteinte ? Icons.check_circle : Icons.radio_button_unchecked,
-                          color: atteinte ? Colors.green : Colors.grey,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(commande.description,
+                                style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.brunTexte)),
+                            const SizedBox(height: 4),
+                            Text('${commande.montant.toStringAsFixed(0)} FCFA',
+                                style: const TextStyle(color: AppColors.brunClair)),
+                          ],
                         ),
-                        const SizedBox(width: 12),
-                        Text(
-                          StatutCommande.libelle(statut),
-                          style: TextStyle(
-                            fontWeight: atteinte ? FontWeight.bold : FontWeight.normal,
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: couleurStatut(commande.statut).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            StatutCommande.libelle(commande.statut),
+                            style: TextStyle(
+                                color: couleurStatut(commande.statut),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12),
                           ),
                         ),
                       ],
                     ),
-                  );
-                }),
+                  ),
+                const SizedBox(height: 24),
+                const Text('Suivi',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.brunTexte)),
+                const SizedBox(height: 12),
+                ...List.generate(StatutCommande.ordre.length, (i) {
+                    final statut = StatutCommande.ordre[i];
+                    final atteinte = i <= etapeActuelle;
+                    final estDernier = i == StatutCommande.ordre.length - 1;
+
+                    return IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Column(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: atteinte ? AppColors.vert : AppColors.creme,
+                                  border: Border.all(
+                                    color: atteinte ? AppColors.vert : AppColors.bordure,
+                                    width: 2,
+                                  ),
+                                ),
+                                 child: Icon(
+                                  _icone(statut),
+                                  size: 18,
+                                  color: atteinte ? Colors.white : AppColors.brunClair,
+                                ),
+                              ),
+                              if (!estDernier)
+                                Expanded(
+                                  child: Container(
+                                    width: 2,
+                                    color: atteinte ? AppColors.vert : AppColors.bordure,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(width: 14),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8, bottom: 24),
+                            child: Text(
+                              StatutCommande.libelle(statut),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: atteinte ? FontWeight.w600 : FontWeight.normal,
+                                color: atteinte ? AppColors.brunTexte : AppColors.brunClair,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+
+                if (commande.livreurId != null) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: AppColors.carte,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.bordure),
+                    ),
+                    child: const Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 22,
+                          backgroundColor: AppColors.creme,
+                          child: Icon(Icons.person, color: AppColors.terracotta),
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Text('Ton livreur',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.brunTexte)),
+                        ),
+                        Icon(Icons.call, color: AppColors.vert),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           );

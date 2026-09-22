@@ -36,24 +36,54 @@ class MesCommandes extends StatelessWidget {
             itemCount: commandes.length,
             itemBuilder: (context, i) {
               final commande = commandes[i];
-              return Card(
-                margin: const EdgeInsets.all(12),
-                child: ListTile(
-                  title: Text(commande.description),
-                  subtitle: Text(
-                    '${commande.montant.toStringAsFixed(0)} FCFA — ${StatutCommande.libelle(commande.statut)}',
+              return Dismissible(
+                key: Key(commande.id),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 24),
+                  color: Colors.red,
+                  child: const Icon(Icons.delete, color: Colors.white),
+                ),
+                confirmDismiss: (direction) async {
+                  return await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Supprimer la commande ?'),
+                      content: const Text('Cette action est irréversible.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Annuler'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                onDismissed: (direction) => service.supprimerCommande(commande.id),
+                child: Card(
+                  margin: const EdgeInsets.all(12),
+                  child: ListTile(
+                    title: Text(commande.description),
+                    subtitle: Text(
+                      '${commande.montant.toStringAsFixed(0)} FCFA — ${StatutCommande.libelle(commande.statut)}',
+                    ),
+                    trailing: commande.statut == StatutCommande.livree
+                        ? const Icon(Icons.check_circle, color: Colors.green)
+                        : const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => SuiviCommande(commandeId: commande.id),
+                        ),
+                      );
+                    },
                   ),
-                  trailing: commande.statut == StatutCommande.livree
-                      ? const Icon(Icons.check_circle, color: Colors.green)
-                      : const Icon(Icons.chevron_right),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => SuiviCommande(commandeId: commande.id),
-                      ),
-                    );
-                  },
                 ),
               );
             },

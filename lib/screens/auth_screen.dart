@@ -19,6 +19,7 @@ class _AuthScreenState extends State<AuthScreen> {
   bool _chargement = false;
 
   Future<void> _soumettre() async {
+    if (!mounted) return;
     setState(() {
       _chargement = true;
       _erreur = null;
@@ -38,6 +39,7 @@ class _AuthScreenState extends State<AuthScreen> {
       );
     }
 
+    if (!mounted) return;
     setState(() {
       _chargement = false;
       _erreur = erreur;

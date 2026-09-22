@@ -42,10 +42,26 @@ class CommandeService {
             .toList());
   }
 
+  // Commandes livrées d'un établissement (historique côté gérant)
+  Stream<List<Commande>> commandesLivreesDeLetablissement(
+      String etablissementId) {
+    return _db
+        .collection('commandes')
+        .where('etablissementId', isEqualTo: etablissementId)
+        .where('statut', isEqualTo: StatutCommande.livree)
+        .snapshots()
+        .map((snap) => snap.docs
+            .map((doc) => Commande.fromMap(doc.id, doc.data()))
+            .toList());
+  }
+
   // Faire avancer le statut (utilisé plus tard côté gérant/livreur)
   Future<void> mettreAJourStatut(String commandeId, String nouveauStatut) async {
     await _db.collection('commandes').doc(commandeId).update({
       'statut': nouveauStatut,
     });
+  }
+  Future<void> supprimerCommande(String commandeId) async {
+    await _db.collection('commandes').doc(commandeId).delete();
   }
 }
