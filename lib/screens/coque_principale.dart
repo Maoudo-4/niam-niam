@@ -30,7 +30,7 @@ class _CoquePrincipaleState extends State<CoquePrincipale> {
       const _PagePlaceholder(titre: 'Commandes reçues'),
     RoleUtilisateur.livreur => const MissionsPage(),
   };
-  
+
   // Onglet Profil : provisoire, seul le gérant a une vraie page pour l'instant
   Widget _pageProfil() => switch (widget.role) {
     RoleUtilisateur.client => const ProfilClientPage(),

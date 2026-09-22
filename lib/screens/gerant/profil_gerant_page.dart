@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../models/etablissement.dart';
-import '../../models/produit.dart';
 import '../../services/etablissement_service.dart';
-import '../../services/produit_service.dart';
 import '../../theme.dart';
+import '../../widgets/confirmer_deconnexion.dart';
+import '../client/changer_mot_de_passe_screen.dart';
+import 'plats_etablissement_page.dart';
+import 'modifier_etablissement_screen.dart';
+import 'historique_commandes_gerant_page.dart';
+import 'statistiques_gerant_page.dart';
 
-/// Page provisoire de l'onglet Profil du gérant :
-/// il y publie les plats disponibles dans son établissement.
+/// Onglet Profil du gérant : en-tête (établissement) + menu « Mon établissement ».
 class ProfilGerantPage extends StatefulWidget {
   const ProfilGerantPage({super.key});
 
@@ -16,58 +19,64 @@ class ProfilGerantPage extends StatefulWidget {
 }
 
 class _ProfilGerantPageState extends State<ProfilGerantPage> {
-  final _etablissementService = EtablissementService();
-  final _produitService = ProduitService();
+  final _service = EtablissementService();
   late Future<Etablissement?> _etablissementFuture;
 
   @override
   void initState() {
     super.initState();
+    _charger();
+  }
+
+  void _charger() {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     _etablissementFuture = uid == null
         ? Future<Etablissement?>.value(null)
-        : _etablissementService.getEtablissementParProprietaire(uid);
+        : _service.getEtablissementParProprietaire(uid);
   }
 
-  // Le type de l'établissement s'écrit « maïga », la catégorie du plat « maiga »
-  String _categorieProduit(Etablissement e) =>
-      e.type == 'maïga' ? 'maiga' : e.type;
-
-  Future<void> _ajouterPlat(Etablissement e) async {
-    final plat = await showDialog<_NouveauPlat>(
-      context: context,
-      builder: (_) => const _DialogAjoutPlat(),
+  Future<void> _modifierEtablissement(Etablissement e) async {
+    final modifie = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ModifierEtablissementScreen(etablissement: e),
+      ),
     );
-    if (plat == null) return;
-
-    try {
-      await _produitService.ajouterProduit(
-        etablissementId: e.id,
-        nom: plat.nom,
-        prix: plat.prix,
-        categorie: _categorieProduit(e),
-      );
-    } catch (err) {
-      if (!mounted) return;
+    if (modifie == true && mounted) {
+      setState(_charger);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('❌ Erreur : $err')),
+        const SnackBar(content: Text('✅ Établissement mis à jour')),
       );
     }
   }
 
-  Future<void> _supprimerPlat(Produit p) async {
-    try {
-      await _produitService.supprimerProduit(p.id);
-    } catch (err) {
-      if (!mounted) return;
+  String _initiales(Etablissement e) =>
+      e.nom.isNotEmpty ? e.nom[0].toUpperCase() : '?';
+
+  Future<void> _changerMotDePasse() async {
+    final ok = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (_) => const ChangerMotDePasseScreen()),
+    );
+    if (ok == true && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('❌ Erreur : $err')),
+        const SnackBar(content: Text('✅ Mot de passe modifié')),
       );
     }
+  }
+
+  // Provisoire : historique et statistiques arrivent aux prochaines étapes
+  void _ouvrirBientot(String titre) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => _PageBientot(titre: titre)),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final email = FirebaseAuth.instance.currentUser?.email;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Profil')),
       body: FutureBuilder<Etablissement?>(
@@ -76,97 +85,170 @@ class _ProfilGerantPageState extends State<ProfilGerantPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
+
           if (snapshot.hasError) {
-            return Center(child: Text('Erreur : ${snapshot.error}'));
-          }
-          final e = snapshot.data;
-          if (e == null) {
-            return const Center(child: Text('Aucun établissement trouvé'));
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('❌ Impossible de charger votre établissement'),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () => setState(_charger),
+                    child: const Text('Réessayer'),
+                  ),
+                ],
+              ),
+            );
           }
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(e.nom,
-                        style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.brunTexte)),
-                    const SizedBox(height: 4),
-                    Text('${e.type} • ${e.adresse}',
-                        style: const TextStyle(color: AppColors.brunClair)),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Mes plats',
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.brunTexte)),
-                    ElevatedButton.icon(
-                      onPressed: () => _ajouterPlat(e),
-                      icon: const Icon(Icons.add),
-                      label: const Text('Ajouter un plat'),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: StreamBuilder<List<Produit>>(
-                  stream:
-                      _produitService.produitsDisponibles(etablissementId: e.id),
-                  builder: (context, snap) {
-                    if (snap.hasError) {
-                      return Center(child: Text('Erreur : ${snap.error}'));
-                    }
-                    if (!snap.hasData) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    final plats = snap.data!;
-                    if (plats.isEmpty) {
-                      return const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(24),
-                          child: Text(
-                            'Aucun plat pour le moment. Ajoutez-en pour que '
-                            'les clients puissent commander chez vous.',
-                            textAlign: TextAlign.center,
+          final e = snapshot.data;
+          if (e == null) {
+            return const Center(child: Text('Établissement introuvable'));
+          }
+
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight - 40,
+                  ),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // En-tête : avatar, nom, email, adresse
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 32,
+                              backgroundColor: AppColors.terracotta,
+                              child: Text(
+                                _initiales(e),
+                                style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    e.nom,
+                                    style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.brunTexte),
+                                  ),
+                                  if (email != null && email.isNotEmpty) ...[
+                                    const SizedBox(height: 4),
+                                    Text(email,
+                                        style: const TextStyle(
+                                            fontSize: 13,
+                                            color: AppColors.brunClair)),
+                                  ],
+                                  if (e.adresse.isNotEmpty) ...[
+                                    const SizedBox(height: 2),
+                                    Text(e.adresse,
+                                        style: const TextStyle(
+                                            fontSize: 13,
+                                            color: AppColors.brunClair)),
+                                  ],
+                                ],
+                              ),
+                            ),
+                            IconButton.filledTonal(
+                              onPressed: () => _modifierEtablissement(e),
+                              icon: const Icon(Icons.edit, size: 20),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 20),
+                        const Divider(height: 1),
+                        const SizedBox(height: 20),
+
+                        const Text('Mon établissement',
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.brunTexte)),
+                        const SizedBox(height: 14),
+
+                        Expanded(
+                          child: _LigneMenu(
+                            icone: Icons.lock_outline,
+                            titre: 'Changer le mot de passe',
+                            onTap: _changerMotDePasse,
                           ),
                         ),
-                      );
-                    }
-                    return ListView.builder(
-                      padding: const EdgeInsets.only(bottom: 32),
-                      itemCount: plats.length,
-                      itemBuilder: (context, i) {
-                        final p = plats[i];
-                        return ListTile(
-                          leading: const Icon(Icons.restaurant_menu,
-                              color: AppColors.terracotta),
-                          title: Text(p.nom),
-                          subtitle: Text('${p.prix.toStringAsFixed(0)} FCFA'),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete_outline),
-                            onPressed: () => _supprimerPlat(p),
+                        const SizedBox(height: 10),
+                        Expanded(
+                          child: _LigneMenu(
+                            icone: Icons.restaurant_menu,
+                            titre: 'Gérer les plats',
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) =>
+                                      const PlatsEtablissementPage()),
+                            ),
                           ),
-                        );
-                      },
-                    );
-                  },
+                        ),
+                        const SizedBox(height: 10),
+                        Expanded(
+                          child: _LigneMenu(
+                            icone: Icons.receipt_long,
+                            titre: 'Historique des commandes reçues',
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) =>
+                                      const HistoriqueCommandesGerantPage()),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Expanded(
+                          child: _LigneMenu(
+                            icone: Icons.bar_chart,
+                            titre: 'Statistiques',
+                            onTap: () =>Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) =>
+                                      const StatistiquesGerantPage()),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Expanded(
+                          child: _LigneMenu(
+                            icone: Icons.help_outline,
+                            titre: 'Aide et assistance',
+                            onTap: () =>
+                                _ouvrirBientot('Aide et assistance'),
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        ElevatedButton.icon(
+                          onPressed: () => confirmerDeconnexion(context),
+                          icon: const Icon(Icons.logout),
+                          label: const Text('Se déconnecter'),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              );
+            },
           );
         },
       ),
@@ -174,80 +256,67 @@ class _ProfilGerantPageState extends State<ProfilGerantPage> {
   }
 }
 
-/// Résultat de la fenêtre d'ajout.
-class _NouveauPlat {
-  final String nom;
-  final double prix;
-  _NouveauPlat(this.nom, this.prix);
-}
-
-/// Petite fenêtre : nom + prix du plat.
-class _DialogAjoutPlat extends StatefulWidget {
-  const _DialogAjoutPlat();
-
-  @override
-  State<_DialogAjoutPlat> createState() => _DialogAjoutPlatState();
-}
-
-class _DialogAjoutPlatState extends State<_DialogAjoutPlat> {
-  final _formKey = GlobalKey<FormState>();
-  final _nomController = TextEditingController();
-  final _prixController = TextEditingController();
-
-  @override
-  void dispose() {
-    _nomController.dispose();
-    _prixController.dispose();
-    super.dispose();
-  }
-
-  double? _lirePrix(String? v) =>
-      double.tryParse((v ?? '').trim().replaceAll(',', '.'));
-
-  void _valider() {
-    if (!_formKey.currentState!.validate()) return;
-    Navigator.pop(
-      context,
-      _NouveauPlat(_nomController.text.trim(), _lirePrix(_prixController.text)!),
-    );
-  }
+/// Une ligne du menu, sous forme de carte : pastille d'icône + titre + flèche.
+class _LigneMenu extends StatelessWidget {
+  final IconData icone;
+  final String titre;
+  final VoidCallback onTap;
+  const _LigneMenu({
+    required this.icone,
+    required this.titre,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Ajouter un plat'),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _nomController,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(labelText: 'Nom du plat'),
-              validator: (v) =>
-                  v == null || v.trim().isEmpty ? 'Nom requis' : null,
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _prixController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Prix (FCFA)'),
-              validator: (v) {
-                final p = _lirePrix(v);
-                return (p == null || p <= 0) ? 'Prix invalide' : null;
-              },
-            ),
-          ],
+    final forme = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(14),
+      side: const BorderSide(color: AppColors.bordure),
+    );
+
+    return Material(
+      color: AppColors.carte,
+      shape: forme,
+      child: InkWell(
+        customBorder: forme,
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.terracotta.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icone, color: AppColors.terracotta, size: 20),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(titre,
+                    style: const TextStyle(
+                        fontSize: 15, color: AppColors.brunTexte)),
+              ),
+              const Icon(Icons.chevron_right, color: AppColors.brunClair),
+            ],
+          ),
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Annuler'),
-        ),
-        ElevatedButton(onPressed: _valider, child: const Text('Ajouter')),
-      ],
+    );
+  }
+}
+
+/// Page provisoire pour les sous-pages pas encore construites.
+class _PageBientot extends StatelessWidget {
+  final String titre;
+  const _PageBientot({required this.titre});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(titre)),
+      body: Center(child: Text('$titre : bientôt disponible')),
     );
   }
 }

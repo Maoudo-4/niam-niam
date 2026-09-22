@@ -17,6 +17,19 @@ class AvisService {
             });
   }
 
+  // Avis reçus par cet établissement, en temps réel.
+  // Clé = id de la commande notée.
+  Stream<Map<String, Avis>> avisDeLetablissement(String etablissementId) {
+    return _db
+        .collection('avis')
+        .where('etablissementId', isEqualTo: etablissementId)
+        .snapshots()
+        .map((snap) => {
+              for (final doc in snap.docs)
+                doc.id: Avis.fromMap(doc.id, doc.data()),
+            });
+  }
+
   // Enregistre l'avis ET met à jour la note de l'établissement,
   // en une seule transaction (tout réussit ou rien n'est modifié).
   Future<void> ajouterAvis({
