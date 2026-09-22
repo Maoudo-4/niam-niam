@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../models/commande.dart';
 import '../../models/etablissement.dart';
 import '../../models/produit.dart';
 import '../../services/commande_service.dart';
@@ -18,21 +19,43 @@ class PasserCommande extends StatefulWidget {
 class _PasserCommandeState extends State<PasserCommande> {
   final _service = CommandeService();
   final _produitService = ProduitService();
-  Produit? _produitChoisi;
-  int _quantite = 1;
+
+  // Quantité choisie par produit (clé = produitId). Absent ou 0 = pas au panier.
+  final Map<String, int> _quantites = {};
   bool _envoi = false;
 
-  Future<void> _commander() async {
-    if (_produitChoisi == null) return;
+  int _quantite(String produitId) => _quantites[produitId] ?? 0;
+
+  void _changerQuantite(String produitId, int delta) {
+    setState(() {
+      final nouvelle = _quantite(produitId) + delta;
+      _quantites[produitId] = nouvelle < 0 ? 0 : nouvelle;
+    });
+  }
+
+  List<LigneCommande> _construireLignes(List<Produit> produits) {
+    return produits
+        .where((p) => _quantite(p.id) > 0)
+        .map((p) => LigneCommande(
+              produitId: p.id,
+              nom: p.nom,
+              prixUnitaire: p.prix,
+              quantite: _quantite(p.id),
+            ))
+        .toList();
+  }
+
+  Future<void> _payer(List<Produit> produits) async {
+    final lignes = _construireLignes(produits);
+    if (lignes.isEmpty) return;
 
     setState(() => _envoi = true);
     final uid = FirebaseAuth.instance.currentUser!.uid;
 
     final commandeId = await _service.creerCommande(
       clientId: uid,
-      etablissementId: _produitChoisi!.etablissementId,
-      description: '${_produitChoisi!.nom} x$_quantite',
-      montant: _produitChoisi!.prix * _quantite,
+      etablissementId: widget.etablissement.id,
+      lignes: lignes,
     );
 
     if (!mounted) return;
@@ -48,125 +71,131 @@ class _PasserCommandeState extends State<PasserCommande> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Commander chez ${widget.etablissement.nom}')),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Détails de la commande',
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.brunTexte)),
-            const SizedBox(height: 14),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.carte,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.bordure),
+      body: StreamBuilder<List<Produit>>(
+        stream: _produitService.produitsDisponibles(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final produits = snapshot.data!
+              .where((p) =>
+                  p.categorie != 'maiga' &&
+                  p.etablissementId == widget.etablissement.id)
+              .toList();
+
+          if (produits.isEmpty) {
+            return const Center(
+              child: Text('Aucun plat disponible pour le moment'),
+            );
+          }
+
+          final lignes = _construireLignes(produits);
+          final total = lignes.fold<double>(0, (t, l) => t + l.sousTotal);
+          final nombreArticles = lignes.length;
+
+          return Column(
+            children: [
+              Expanded(
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(20),
+                  itemCount: produits.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 12),
+                  itemBuilder: (context, i) {
+                    final p = produits[i];
+                    final q = _quantite(p.id);
+                    return Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: AppColors.carte,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: AppColors.bordure),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(p.nom,
+                                    style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.brunTexte)),
+                                const SizedBox(height: 4),
+                                Text('${p.prix.toStringAsFixed(0)} FCFA',
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        color: AppColors.brunClair)),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: q > 0
+                                ? () => _changerQuantite(p.id, -1)
+                                : null,
+                            icon: const Icon(Icons.remove_circle_outline),
+                            color: AppColors.terracotta,
+                          ),
+                          Text('$q',
+                              style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.brunTexte)),
+                          IconButton(
+                            onPressed: () => _changerQuantite(p.id, 1),
+                            icon: const Icon(Icons.add_circle_outline),
+                            color: AppColors.vert,
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
-              child: StreamBuilder<List<Produit>>(
-                stream: _produitService.produitsDisponibles(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  // Seulement les plats de CET établissement
-                  final produits = snapshot.data!
-                      .where((p) =>
-                          p.categorie != 'maiga' &&
-                          p.etablissementId == widget.etablissement.id)
-                      .toList();
-                  if (produits.isEmpty) {
-                    return const Text('Aucun plat disponible pour le moment');
-                  }
-                  return DropdownButtonFormField<Produit>(
-                    decoration:
-                        const InputDecoration(labelText: 'Choisir un plat'),
-                    initialValue: _produitChoisi,
-                    items: produits.map((p) {
-                      return DropdownMenuItem(
-                        value: p,
-                        child: Text(
-                            '${p.nom} — ${p.prix.toStringAsFixed(0)} FCFA'),
-                      );
-                    }).toList(),
-                    onChanged: (p) => setState(() => _produitChoisi = p),
-                  );
-                },
-              ),
-            ),
-            if (_produitChoisi != null) ...[
-              const SizedBox(height: 20),
-              const Text('Quantité',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.brunTexte)),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: _quantite > 1
-                        ? () => setState(() => _quantite--)
-                        : null,
-                    icon: const Icon(Icons.remove_circle_outline),
-                    color: AppColors.terracotta,
-                  ),
-                  Text('$_quantite',
-                      style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.brunTexte)),
-                  IconButton(
-                    onPressed: () => setState(() => _quantite++),
-                    icon: const Icon(Icons.add_circle_outline),
-                    color: AppColors.vert,
-                  ),
-                ],
-              ),
-            ],
-            const Spacer(),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.carte,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.bordure),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.carte,
+                  border: Border(top: BorderSide(color: AppColors.bordure)),
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Total',
-                          style: TextStyle(
-                              fontSize: 12, color: AppColors.brunClair)),
-                      Text(
-                        '${((_produitChoisi?.prix ?? 0) * _quantite).toStringAsFixed(0)} FCFA',
-                        style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.brunTexte),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Total',
+                              style: TextStyle(
+                                  fontSize: 12, color: AppColors.brunClair)),
+                          Text(
+                            '${total.toStringAsFixed(0)} FCFA',
+                            style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.brunTexte),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        width: 180,
+                        child: _envoi
+                            ? const Center(child: CircularProgressIndicator())
+                            : ElevatedButton(
+                                onPressed: nombreArticles > 0
+                                    ? () => _payer(produits)
+                                    : null,
+                                child: Text('Payer ($nombreArticles)'),
+                              ),
                       ),
                     ],
                   ),
-                  SizedBox(
-                    width: 180,
-                    child: _envoi
-                        ? const Center(child: CircularProgressIndicator())
-                        : ElevatedButton(
-                            onPressed: _commander,
-                            child: const Text('Payer (simulé)'),
-                          ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        },
       ),
     );
   }

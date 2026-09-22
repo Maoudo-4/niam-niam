@@ -4,17 +4,18 @@ import '../models/commande.dart';
 class CommandeService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // Créer une nouvelle commande
+  // Créer une nouvelle commande à partir des lignes du panier
   Future<String> creerCommande({
     required String clientId,
     required String etablissementId,
-    required String description,
-    required double montant,
+    required List<LigneCommande> lignes,
   }) async {
+    final montant = lignes.fold<double>(0, (total, l) => total + l.sousTotal);
+
     final doc = await _db.collection('commandes').add({
       'clientId': clientId,
       'etablissementId': etablissementId,
-      'description': description,
+      'lignes': lignes.map((l) => l.toMap()).toList(),
       'montant': montant,
       'statut': StatutCommande.confirmee,
       'createdAt': FieldValue.serverTimestamp(),
