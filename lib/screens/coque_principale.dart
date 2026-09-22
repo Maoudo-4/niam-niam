@@ -5,6 +5,7 @@ import 'client/liste_etablissements_screen.dart';
 import 'client/mes_commandes.dart';
 import 'livreur/missions_page.dart';
 import 'gerant/profil_gerant_page.dart';
+import 'gerant/commandes_recues_page.dart';
 import 'client/profil_client_page.dart';
 import 'livreur/profil_livreur_page.dart';
 
@@ -26,8 +27,7 @@ class _CoquePrincipaleState extends State<CoquePrincipale> {
   // L'onglet Commandes est la seule page qui change selon le rôle.
   Widget _pageCommandes() => switch (widget.role) {
     RoleUtilisateur.client => const MesCommandes(),
-    RoleUtilisateur.gerant =>
-      const _PagePlaceholder(titre: 'Commandes reçues'),
+    RoleUtilisateur.gerant => const CommandesRecuesPage(),
     RoleUtilisateur.livreur => const MissionsPage(),
   };
 
@@ -95,16 +95,3 @@ class _CoquePrincipaleState extends State<CoquePrincipale> {
   }
 }
 
-/// Page provisoire pour les onglets pas encore construits.
-class _PagePlaceholder extends StatelessWidget {
-  final String titre;
-  const _PagePlaceholder({required this.titre});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(titre)),
-      body: Center(child: Text('$titre : bientôt disponible')),
-    );
-  }
-}

@@ -55,6 +55,21 @@ class CommandeService {
             .toList());
   }
 
+  // Commandes en cours (non livrées) d'un établissement, pour l'onglet
+  // "Commandes reçues" du gérant. Triées des plus anciennes aux plus
+  // récentes (les plus anciennes sont traitées en premier).
+  Stream<List<Commande>> commandesEnCoursDeLetablissement(
+      String etablissementId) {
+    return _db
+        .collection('commandes')
+        .where('etablissementId', isEqualTo: etablissementId)
+        .snapshots()
+        .map((snap) => snap.docs
+            .map((doc) => Commande.fromMap(doc.id, doc.data()))
+            .where((c) => c.statut != StatutCommande.livree)
+            .toList()
+          ..sort((a, b) => a.createdAt.compareTo(b.createdAt)));
+  }
   // Faire avancer le statut (utilisé plus tard côté gérant/livreur)
   Future<void> mettreAJourStatut(String commandeId, String nouveauStatut) async {
     await _db.collection('commandes').doc(commandeId).update({
