@@ -7,7 +7,7 @@ class SuiviCommande extends StatelessWidget {
   final String commandeId;
   const SuiviCommande({super.key, required this.commandeId});
 
-  @override
+  
   IconData _icone(String statut) {
     switch (statut) {
       case StatutCommande.confirmee: return Icons.receipt_long;
@@ -19,6 +19,7 @@ class SuiviCommande extends StatelessWidget {
       default: return Icons.circle;
     }
   }
+  @override
   Widget build(BuildContext context) {
     final service = CommandeService();
 
