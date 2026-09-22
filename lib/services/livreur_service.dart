@@ -24,6 +24,23 @@ class LivreurService {
     return doc.exists;
   }
 
+  // Modifie prénom, nom, téléphone, adresse et moyen de déplacement
+  Future<void> mettreAJourProfil(Livreur livreur) async {
+    await _livreurs.doc(livreur.uid).update(livreur.toMap());
+  }
+
+  // Livraisons terminées par CE livreur (pour son historique)
+  Stream<List<Commande>> missionsLivrees(String livreurId) {
+    return _db
+        .collection('commandes')
+        .where('livreurId', isEqualTo: livreurId)
+        .where('statut', isEqualTo: StatutCommande.livree)
+        .snapshots()
+        .map((snap) => snap.docs
+            .map((doc) => Commande.fromMap(doc.id, doc.data()))
+            .toList());
+  }
+
   // Missions disponibles : en préparation, sans livreur assigné
   Stream<List<Commande>> missionsDisponibles() {
     return _db

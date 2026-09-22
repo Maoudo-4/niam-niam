@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/etablissement.dart';
+import '../../services/favoris_service.dart';
 import 'passer_commande.dart';
 
 class FicheEtablissementScreen extends StatefulWidget {
@@ -15,6 +16,7 @@ class FicheEtablissementScreen extends StatefulWidget {
 }
 
 class _FicheEtablissementScreenState extends State<FicheEtablissementScreen> {
+  final _favorisService = FavorisService();
   bool _estClient = false;
 
   @override
@@ -23,7 +25,7 @@ class _FicheEtablissementScreenState extends State<FicheEtablissementScreen> {
     _chargerRole();
   }
 
-  // Le bouton Commander n'est visible que pour les clients
+  // Le bouton Commander et le cœur ne sont visibles que pour les clients
   Future<void> _chargerRole() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
@@ -33,16 +35,63 @@ class _FicheEtablissementScreenState extends State<FicheEtablissementScreen> {
       if (!mounted) return;
       setState(() => _estClient = doc.data()?['role'] == 'client');
     } catch (_) {
-      // Erreur réseau : on n'affiche simplement pas le bouton
+      // Erreur réseau : on n'affiche simplement pas les boutons
     }
   }
+
+  // ajoute ou retire l'établissement des favoris
+  Future<void> _basculerFavori(String uid, bool dejaFavori) async {
+    try {
+      await _favorisService.basculer(
+        uid,
+        widget.etablissement.id,
+        dejaFavori: dejaFavori,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(dejaFavori
+              ? 'Retiré des favoris'
+              : 'Ajouté aux favoris'),
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('❌ Erreur : $e')),
+      );
+    }
+  } 
 
   @override
   Widget build(BuildContext context) {
     final etablissement = widget.etablissement;
+    final uid = FirebaseAuth.instance.currentUser?.uid;
 
     return Scaffold(
-      appBar: AppBar(title: Text(etablissement.nom)),
+      appBar: AppBar(
+        title: Text(etablissement.nom),
+        // NOUVEAU : le cœur, seulement pour les clients
+        actions: [
+          if (_estClient && uid != null)
+            StreamBuilder<Set<String>>(
+              stream: _favorisService.favorisDuClient(uid),
+              builder: (context, snap) {
+                final estFavori =
+                    snap.data?.contains(etablissement.id) ?? false;
+                return IconButton(
+                  tooltip: estFavori
+                      ? 'Retirer des favoris'
+                      : 'Ajouter aux favoris',
+                  icon: Icon(
+                      estFavori ? Icons.favorite : Icons.favorite_border),
+                  onPressed: () => _basculerFavori(uid, estFavori),
+                );
+              },
+            ),
+        ],        
+      ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

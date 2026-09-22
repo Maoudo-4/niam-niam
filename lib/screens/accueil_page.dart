@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import '../widgets/accueil_contenu.dart';
-import '../widgets/confirmer_deconnexion.dart';
 
 /// Page d'accueil commune aux trois rôles (onglet Accueil de la coque).
 class AccueilPage extends StatelessWidget {
-  // Reçoit le type de la section dont on a cliqué « Voir tout »
+  // Reçoit le type choisi ('restaurant', 'fast-food' ou 'maïga'),
+  // depuis un « Voir tout » ou depuis une pastille de catégorie
   final ValueChanged<String> onVoirTout;
-
   const AccueilPage({super.key, required this.onVoirTout});
 
   @override
@@ -14,12 +13,6 @@ class AccueilPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('NIAM-NIAM'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => confirmerDeconnexion(context),
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),

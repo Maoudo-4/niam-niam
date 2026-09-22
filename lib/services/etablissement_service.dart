@@ -41,4 +41,10 @@ class EtablissementService {
     }
     return null;
   }
+
+  // Modifie les infos d'un établissement existant
+  Future<void> mettreAJourEtablissement(Etablissement etablissement) async {
+    await _collection.doc(etablissement.id).update(etablissement.toMap());
+  }
+
 }

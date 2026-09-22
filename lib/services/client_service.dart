@@ -5,7 +5,7 @@ class ClientService {
   final CollectionReference<Map<String, dynamic>> _col =
       FirebaseFirestore.instance.collection('clients');
 
-  // Enregistre (ou met à jour) le profil client.
+  // Enregistre (ou remplace) le profil client.
   // L'ID du document = l'uid de l'utilisateur Firebase Auth.
   Future<void> creerProfil(Client client) async {
     await _col.doc(client.uid).set(client.toMap());
@@ -22,5 +22,10 @@ class ClientService {
   Future<bool> profilExiste(String uid) async {
     final doc = await _col.doc(uid).get();
     return doc.exists;
+  }
+
+  // Modifie prénom, nom, téléphone et adresse
+  Future<void> mettreAJourProfil(Client client) async {
+    await _col.doc(client.uid).update(client.toMap());
   }
 }
