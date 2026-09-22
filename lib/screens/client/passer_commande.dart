@@ -84,7 +84,7 @@ class _PasserCommandeState extends State<PasserCommande> {
                   return DropdownButtonFormField<Produit>(
                     decoration:
                         const InputDecoration(labelText: 'Choisir un plat'),
-                    value: _produitChoisi,
+                    initialValue: _produitChoisi,
                     items: produits.map((p) {
                       return DropdownMenuItem(
                         value: p,
