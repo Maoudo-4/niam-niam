@@ -119,7 +119,7 @@ class _HistoriqueCommandesPageState extends State<HistoriqueCommandesPage> {
                         return ListView.separated(
                           padding: const EdgeInsets.all(20),
                           itemCount: livrees.length,
-                          separatorBuilder: (_, __) =>
+                          separatorBuilder: (_, _) =>
                               const SizedBox(height: 12),
                           itemBuilder: (context, i) {
                             final c = livrees[i];
