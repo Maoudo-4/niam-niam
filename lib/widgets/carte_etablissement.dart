@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/etablissement.dart';
+import '../services/favoris_service.dart';
 import '../theme.dart';
 import '../screens/client/fiche_etablissement_screen.dart';
 
@@ -9,12 +11,15 @@ class CarteEtablissement extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => FicheEtablissementScreen(etablissement: etablissement),
+            builder: (_) =>
+                FicheEtablissementScreen(etablissement: etablissement),
           ),
         );
       },
@@ -29,19 +34,63 @@ class CarteEtablissement extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              height: 90,
-              decoration: const BoxDecoration(
-                color: AppColors.creme,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-              ),
-              child: etablissement.photoUrl.isEmpty
-                  ? const Icon(Icons.restaurant, color: AppColors.terracotta, size: 32)
-                  : ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                      child: Image.network(etablissement.photoUrl,
-                          fit: BoxFit.cover, width: double.infinity),
+            Stack(
+              children: [
+                Container(
+                  height: 90,
+                  width: double.infinity,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    color: AppColors.creme,
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(16)),
+                  ),
+                  child: etablissement.photoUrl.isEmpty
+                      ? Icon(iconePourType(etablissement.type),
+                          color: AppColors.terracotta, size: 32)
+                      : ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(16)),
+                          child: Image.network(etablissement.photoUrl,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: 90),
+                        ),
+                ),
+                if (uid != null)
+                  Positioned(
+                    top: 6,
+                    right: 6,
+                    child: StreamBuilder<Set<String>>(
+                      stream: FavorisService().favorisDuClient(uid),
+                      builder: (context, snap) {
+                        final favoris = snap.data ?? {};
+                        final estFavori = favoris.contains(etablissement.id);
+                        return GestureDetector(
+                          onTap: () => FavorisService().basculer(
+                            uid,
+                            etablissement.id,
+                            dejaFavori: estFavori,
+                          ),
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              estFavori
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: AppColors.terracotta,
+                              size: 16,
+                            ),
+                          ),
+                        );
+                      },
                     ),
+                  ),
+              ],
             ),
             Padding(
               padding: const EdgeInsets.all(10),
@@ -52,14 +101,16 @@ class CarteEtablissement extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                          fontWeight: FontWeight.w600, color: AppColors.brunTexte)),
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.brunTexte)),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       const Icon(Icons.star, color: AppColors.or, size: 14),
                       const SizedBox(width: 3),
                       Text(etablissement.noteMoyenne.toStringAsFixed(1),
-                          style: const TextStyle(fontSize: 12, color: AppColors.brunClair)),
+                          style: const TextStyle(
+                              fontSize: 12, color: AppColors.brunClair)),
                     ],
                   ),
                 ],

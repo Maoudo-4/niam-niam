@@ -61,7 +61,7 @@ class _PasserCommandeState extends State<PasserCommande> {
     if (!mounted) return;
     setState(() => _envoi = false);
 
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => SuiviCommande(commandeId: commandeId)),
     );
