@@ -102,6 +102,7 @@ class LigneCommande {
 class StatutCommande {
   static const confirmee = 'confirmee';
   static const enPreparation = 'en_preparation';
+  static const prete = 'prete';
   static const livreurAssigne = 'livreur_assigne';
   static const recuperee = 'recuperee';
   static const enRoute = 'en_route';
@@ -110,6 +111,7 @@ class StatutCommande {
   static const ordre = [
     confirmee,
     enPreparation,
+    prete,
     livreurAssigne,
     recuperee,
     enRoute,
@@ -120,6 +122,7 @@ class StatutCommande {
     switch (statut) {
       case confirmee: return 'Commande confirmée';
       case enPreparation: return 'En préparation';
+      case prete: return 'Prête, en attente d\'un livreur';
       case livreurAssigne: return 'Livreur assigné';
       case recuperee: return 'Récupérée par le livreur';
       case enRoute: return 'En route';

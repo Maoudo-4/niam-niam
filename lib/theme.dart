@@ -28,6 +28,20 @@ Color couleurStatut(String statut) {
       return AppColors.brunClair;
   }
 }
+// Icône associée au type d'établissement, pour illustrer les plats
+// à défaut d'avoir des photos.
+IconData iconePourType(String type) {
+  switch (type) {
+    case 'restaurant':
+      return Icons.restaurant;
+    case 'fast-food':
+      return Icons.lunch_dining;
+    case 'maiga':
+      return Icons.storefront;
+    default:
+      return Icons.fastfood;
+  }
+}
 
 ThemeData buildAppTheme() {
   return ThemeData(

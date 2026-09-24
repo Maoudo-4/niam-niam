@@ -91,8 +91,13 @@ class _CarteCommande extends StatelessWidget {
         );
       case StatutCommande.enPreparation:
         return (
-          label: 'Marquer comme prête',
-          prochainStatut: StatutCommande.livreurAssigne,
+          label: 'Commande prête',
+          prochainStatut: StatutCommande.prete,
+        );
+      case StatutCommande.livreurAssigne:
+        return (
+          label: 'Commande récupérée',
+          prochainStatut: StatutCommande.recuperee,
         );
       default:
         return null;

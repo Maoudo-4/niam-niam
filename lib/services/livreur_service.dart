@@ -41,11 +41,11 @@ class LivreurService {
             .toList());
   }
 
-  // Missions disponibles : en préparation, sans livreur assigné
+  // Missions disponibles : commande prête, sans livreur assigné
   Stream<List<Commande>> missionsDisponibles() {
     return _db
         .collection('commandes')
-        .where('statut', isEqualTo: StatutCommande.enPreparation)
+        .where('statut', isEqualTo: StatutCommande.prete)
         .snapshots()
         .map((snap) => snap.docs
             .map((doc) => Commande.fromMap(doc.id, doc.data()))

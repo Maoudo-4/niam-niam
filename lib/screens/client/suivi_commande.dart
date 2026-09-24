@@ -12,6 +12,7 @@ class SuiviCommande extends StatelessWidget {
     switch (statut) {
       case StatutCommande.confirmee: return Icons.receipt_long;
       case StatutCommande.enPreparation: return Icons.soup_kitchen;
+      case StatutCommande.prete: return Icons.check_circle_outline;
       case StatutCommande.livreurAssigne: return Icons.person_pin_circle;
       case StatutCommande.recuperee: return Icons.shopping_bag;
       case StatutCommande.enRoute: return Icons.delivery_dining;
@@ -35,9 +36,10 @@ class SuiviCommande extends StatelessWidget {
           final commande = snapshot.data!;
           final etapeActuelle = StatutCommande.ordre.indexOf(commande.statut);
 
-          return Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                   Container(
@@ -47,35 +49,77 @@ class SuiviCommande extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: AppColors.bordure),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Row(
                           children: [
-                            Text(commande.description,
-                                style: const TextStyle(
-                                    fontSize: 16,
+                            const Expanded(
+                              child: Text('Ta commande',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.brunTexte)),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: couleurStatut(commande.statut)
+                                    .withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                StatutCommande.libelle(commande.statut),
+                                style: TextStyle(
+                                    color: couleurStatut(commande.statut),
                                     fontWeight: FontWeight.w600,
-                                    color: AppColors.brunTexte)),
-                            const SizedBox(height: 4),
-                            Text('${commande.montant.toStringAsFixed(0)} FCFA',
-                                style: const TextStyle(color: AppColors.brunClair)),
+                                    fontSize: 12),
+                              ),
+                            ),
                           ],
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: couleurStatut(commande.statut).withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            StatutCommande.libelle(commande.statut),
-                            style: TextStyle(
-                                color: couleurStatut(commande.statut),
-                                fontWeight: FontWeight.w600,
-                                fontSize: 12),
-                          ),
+                        const SizedBox(height: 12),
+                        if (commande.lignes.isNotEmpty)
+                          ...commande.lignes.map((l) => Padding(
+                                padding: const EdgeInsets.only(bottom: 6),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text('${l.nom} x${l.quantite}',
+                                          style: const TextStyle(
+                                              fontSize: 14,
+                                              color: AppColors.brunTexte)),
+                                    ),
+                                    Text(
+                                        '${l.sousTotal.toStringAsFixed(0)} FCFA',
+                                        style: const TextStyle(
+                                            fontSize: 14,
+                                            color: AppColors.brunClair)),
+                                  ],
+                                ),
+                              ))
+                        else
+                          Text(commande.description,
+                              style: const TextStyle(
+                                  fontSize: 14, color: AppColors.brunTexte)),
+                        const Divider(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Total',
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.brunTexte)),
+                            Text('${commande.montant.toStringAsFixed(0)} FCFA',
+                                style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.brunTexte)),
+                          ],
                         ),
                       ],
                     ),
@@ -169,8 +213,42 @@ class SuiviCommande extends StatelessWidget {
                     ),
                   ),
                 ],
+                if (commande.statut == StatutCommande.enRoute) ...[
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        final confirmer = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Confirmer la réception'),
+                            content: const Text(
+                                'Confirmez-vous avoir reçu et payé votre commande auprès du livreur ?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: const Text('Annuler'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                child: const Text('Confirmer'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirmer == true) {
+                          await CommandeService().mettreAJourStatut(
+                              commande.id, StatutCommande.livree);
+                        }
+                      },
+                      child: const Text('Commande reçue'),
+                    ),
+                  ),
+                ],
               ],
             ),
+          ),
           );
         },
       ),

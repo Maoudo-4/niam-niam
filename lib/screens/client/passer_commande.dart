@@ -69,6 +69,7 @@ class _PasserCommandeState extends State<PasserCommande> {
 
   @override
   Widget build(BuildContext context) {
+    final icone = iconePourType(widget.etablissement.type);
     return Scaffold(
       appBar: AppBar(title: Text('Commander chez ${widget.etablissement.nom}')),
       body: StreamBuilder<List<Produit>>(
@@ -78,9 +79,7 @@ class _PasserCommandeState extends State<PasserCommande> {
             return const Center(child: CircularProgressIndicator());
           }
           final produits = snapshot.data!
-              .where((p) =>
-                  p.categorie != 'maiga' &&
-                  p.etablissementId == widget.etablissement.id)
+              .where((p) => p.etablissementId == widget.etablissement.id)
               .toList();
 
           if (produits.isEmpty) {
@@ -110,8 +109,19 @@ class _PasserCommandeState extends State<PasserCommande> {
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(color: AppColors.bordure),
                       ),
-                      child: Row(
+                                            child: Row(
                         children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: AppColors.creme,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(icone,
+                                color: AppColors.terracotta, size: 24),
+                          ),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

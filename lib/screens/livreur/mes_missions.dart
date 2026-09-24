@@ -9,15 +9,13 @@ import '../../services/livreur_service.dart';
 class MesMissions extends StatelessWidget {
   const MesMissions({super.key});
 
-  // Détermine le prochain statut à proposer
+  // Détermine le prochain statut à proposer.
+  // "Récupérée" est désormais confirmée par le gérant, et "Livrée" par le
+  // client — le livreur ne gère que le passage "en route".
   String? _prochainStatut(String statutActuel) {
     switch (statutActuel) {
-      case StatutCommande.livreurAssigne:
-        return StatutCommande.recuperee;
       case StatutCommande.recuperee:
         return StatutCommande.enRoute;
-      case StatutCommande.enRoute:
-        return StatutCommande.livree;
       default:
         return null;
     }
