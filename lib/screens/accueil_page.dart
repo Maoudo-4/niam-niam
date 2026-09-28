@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/accueil_contenu.dart';
+import '../widgets/cloche_notifications.dart';
 
 /// Page d'accueil commune aux trois rôles (onglet Accueil de la coque).
 class AccueilPage extends StatelessWidget {
@@ -13,6 +14,7 @@ class AccueilPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('NIAM-NIAM'),
+        actions: const [ClocheNotifications()],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),

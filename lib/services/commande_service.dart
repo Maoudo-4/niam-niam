@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/commande.dart';
+import 'package:flutter/foundation.dart';
+import 'notification_service.dart';
 
 class CommandeService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -19,6 +21,18 @@ class CommandeService {
       'statut': StatutCommande.confirmee,
       'createdAt': FieldValue.serverTimestamp(),
     });
+    // Prévient le gérant, sans bloquer la commande si l'envoi échoue
+    try {
+      await NotificationService().notifierNouvelleCommande(
+        commandeId: doc.id,
+        etablissementId: etablissementId,
+        description: description,
+        montant: montant,
+      );
+    } catch (e) {
+      debugPrint('Notification non envoyée : $e');
+    }
+
     return doc.id; // utile pour rediriger vers l'écran de suivi
   }
 
@@ -75,6 +89,12 @@ class CommandeService {
     await _db.collection('commandes').doc(commandeId).update({
       'statut': nouveauStatut,
     });
+    try {
+      await NotificationService()
+          .notifierChangementStatut(commandeId, nouveauStatut);
+    } catch (e) {
+      debugPrint('Notification non envoyée : $e');
+    }
   }
   Future<void> supprimerCommande(String commandeId) async {
     await _db.collection('commandes').doc(commandeId).delete();
