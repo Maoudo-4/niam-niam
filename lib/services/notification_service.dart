@@ -117,7 +117,10 @@ class NotificationService {
 
     final clientId = data['clientId'] as String? ?? '';
     final etablissementId = data['etablissementId'] as String? ?? '';
-    final description = data['description'] as String? ?? '';
+    final lignesData = (data['lignes'] as List?) ?? [];
+    final description = lignesData
+        .map((l) => '${l['nom']} x${l['quantite']}')
+        .join(', ');
     final montant = ((data['montant'] ?? 0) as num).toDouble();
 
     // 1. Le client est prévenu à chaque changement de statut
@@ -145,7 +148,7 @@ class NotificationService {
       }
     }
 
-    // 3. Les livreurs sont prévenus quand une mission devient disponible
+    // 3a. Tous les livreurs sont prévenus quand une mission devient disponible
     if (nouveauStatut == StatutCommande.enPreparation) {
       await envoyerAuxLivreurs(
         titre: 'Nouvelle mission disponible',
@@ -153,6 +156,19 @@ class NotificationService {
             'Consultez les missions disponibles.',
         commandeId: commandeId,
       );
+    }
+
+    // 3b. Le livreur déjà assigné est prévenu que la commande est prête
+    if (nouveauStatut == StatutCommande.prete) {
+      final livreurId = data['livreurId'] as String?;
+      if (livreurId != null && livreurId.isNotEmpty) {
+        await envoyer(
+          destinataireId: livreurId,
+          titre: 'Commande prête',
+          message: '$description est prête à être récupérée.',
+          commandeId: commandeId,
+        );
+      }
     }
   }
 

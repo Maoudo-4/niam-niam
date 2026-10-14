@@ -24,6 +24,8 @@ class CommandeService {
     });
     // Prévient le gérant, sans bloquer la commande si l'envoi échoue
     try {
+      final description =
+          lignes.map((l) => '${l.nom} x${l.quantite}').join(', ');
       await NotificationService().notifierNouvelleCommande(
         commandeId: doc.id,
         etablissementId: etablissementId,
