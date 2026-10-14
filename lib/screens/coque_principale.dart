@@ -8,6 +8,7 @@ import 'gerant/profil_gerant_page.dart';
 import 'gerant/commandes_recues_page.dart';
 import 'client/profil_client_page.dart';
 import 'livreur/profil_livreur_page.dart';
+import 'carte_etablissements_page.dart';
 
 /// Les trois rôles de l'appli.
 enum RoleUtilisateur { client, gerant, livreur }
@@ -65,13 +66,14 @@ class _CoquePrincipaleState extends State<CoquePrincipale> {
           _pageProfil(),
         ],
       ),
-        floatingActionButton: FloatingActionButton.small(
-          onPressed: () {
-            // TODO: carte des établissements à proximité (à construire)
-          },
-          backgroundColor: AppColors.terracotta,
-          child: const Icon(Icons.location_searching,
-              color: Colors.white, size: 20),
+      floatingActionButton: FloatingActionButton.small(
+        onPressed: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const CarteEtablissementsPage()),
+        ),
+        backgroundColor: AppColors.terracotta,
+        child: const Icon(Icons.location_searching,
+            color: Colors.white, size: 20),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(

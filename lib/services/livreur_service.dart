@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../models/commande.dart';
-import '../models/livreur.dart'; // ⬅️ NOUVEAU
+import '../models/livreur.dart';
+import 'notification_service.dart'; 
 
 class LivreurService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -75,6 +77,13 @@ class LivreurService {
       'livreurId': livreurId,
       'statut': StatutCommande.livreurAssigne,
     });
+    // prévient le client, sans bloquer la mission si l'envoi échoue
+    try {
+      await NotificationService()
+          .notifierChangementStatut(commandeId, StatutCommande.livreurAssigne);
+    } catch (e) {
+      debugPrint('Notification non envoyée : $e');
+    }
   }
 
   // Faire avancer le statut d'une livraison
@@ -82,5 +91,12 @@ class LivreurService {
     await _db.collection('commandes').doc(commandeId).update({
       'statut': nouveauStatut,
     });
+    // prévient le client (et le gérant à la livraison)
+    try {
+      await NotificationService()
+          .notifierChangementStatut(commandeId, nouveauStatut);
+    } catch (e) {
+      debugPrint('Notification non envoyée : $e');
+    }
   }
 }
