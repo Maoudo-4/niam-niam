@@ -15,6 +15,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final _nomController = TextEditingController();
 
   bool _modeInscription = false;
+  bool _motDePasseCache = true;
   String? _erreur;
   bool _chargement = false;
 
@@ -26,7 +27,7 @@ class _AuthScreenState extends State<AuthScreen> {
     });
 
     String? erreur;
-    if (_modeInscription) {
+    if (_modeInscription)  {
       erreur = await _authService.inscrire(
         _emailController.text.trim(),
         _passwordController.text.trim(),
@@ -61,15 +62,26 @@ class _AuthScreenState extends State<AuthScreen> {
                 controller: _nomController,
                 decoration: const InputDecoration(labelText: 'Nom complet'),
               ),
+            const SizedBox(height: 16),
             TextField(
               controller: _emailController,
               decoration: const InputDecoration(labelText: 'Email'),
               keyboardType: TextInputType.emailAddress,
             ),
+            const SizedBox(height: 16), // marge entre email et mot de passe
             TextField(
               controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Mot de passe'),
-              obscureText: true,
+              obscureText: _motDePasseCache,
+              decoration: InputDecoration(
+                labelText: 'Mot de passe',
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _motDePasseCache ? Icons.visibility_off : Icons.visibility,
+                  ),
+                  onPressed: () =>
+                      setState(() => _motDePasseCache = !_motDePasseCache),
+                ),
+              ),
             ),
             const SizedBox(height: 20),
             if (_erreur != null)
@@ -77,7 +89,11 @@ class _AuthScreenState extends State<AuthScreen> {
             const SizedBox(height: 10),
             _chargement
                 ? const CircularProgressIndicator()
-                : ElevatedButton(
+                  : ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0072CE), // bleu de la barre du haut
+                      foregroundColor: Colors.white,
+                    ),
                     onPressed: _soumettre,
                     child: Text(_modeInscription ? "S'inscrire" : 'Se connecter'),
                   ),
