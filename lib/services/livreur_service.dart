@@ -43,11 +43,14 @@ class LivreurService {
             .toList());
   }
 
-  // Missions disponibles : commande prête, sans livreur assigné
+  // Missions disponibles : commande en préparation ou prête, sans livreur assigné
   Stream<List<Commande>> missionsDisponibles() {
     return _db
         .collection('commandes')
-        .where('statut', isEqualTo: StatutCommande.prete)
+        .where('statut', whereIn: [
+          StatutCommande.enPreparation,
+          StatutCommande.prete,
+        ])
         .snapshots()
         .map((snap) => snap.docs
             .map((doc) => Commande.fromMap(doc.id, doc.data()))
@@ -61,6 +64,8 @@ class LivreurService {
         .collection('commandes')
         .where('livreurId', isEqualTo: livreurId)
         .where('statut', whereIn: [
+          StatutCommande.enPreparation,
+          StatutCommande.prete,
           StatutCommande.livreurAssigne,
           StatutCommande.recuperee,
           StatutCommande.enRoute,
@@ -71,16 +76,14 @@ class LivreurService {
             .toList());
   }
 
-  // Accepter une mission
+  // Accepter une mission : on enregistre le livreur sans changer le statut
   Future<void> accepterMission(String commandeId, String livreurId) async {
     await _db.collection('commandes').doc(commandeId).update({
       'livreurId': livreurId,
-      'statut': StatutCommande.livreurAssigne,
     });
     // prévient le client, sans bloquer la mission si l'envoi échoue
     try {
-      await NotificationService()
-          .notifierChangementStatut(commandeId, StatutCommande.livreurAssigne);
+      await NotificationService().notifierLivreurAssigne(commandeId);
     } catch (e) {
       debugPrint('Notification non envoyée : $e');
     }

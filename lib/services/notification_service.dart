@@ -172,6 +172,19 @@ class NotificationService {
     }
   }
 
+  // Un livreur vient d'accepter la commande : prévient le client
+  Future<void> notifierLivreurAssigne(String commandeId) async {
+    final doc = await _db.collection('commandes').doc(commandeId).get();
+    final clientId = doc.data()?['clientId'] as String? ?? '';
+    if (clientId.isEmpty) return;
+    await envoyer(
+      destinataireId: clientId,
+      titre: 'Livreur assigné',
+      message: 'Un livreur a accepté votre commande.',
+      commandeId: commandeId,
+    );
+  }
+  
   // uid du gérant propriétaire d'un établissement
   Future<String?> _proprietaireDe(String etablissementId) async {
     if (etablissementId.isEmpty) return null;

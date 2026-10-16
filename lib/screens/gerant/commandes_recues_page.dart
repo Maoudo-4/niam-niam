@@ -8,8 +8,9 @@ import '../../theme.dart';
 
 /// Commandes en cours (non livrées) de l'établissement du gérant.
 /// Permet de faire avancer une commande : confirmée -> en préparation ->
-/// prête (en recherche de livreur). Le reste du parcours (récupération,
-/// route, livraison) est piloté par le livreur, pas le gérant.
+/// prête -> récupérée (une fois qu'un livreur a accepté la mission).
+/// Le passage « en route » est fait par le livreur, et la livraison
+/// finale est confirmée par le client.
 class CommandesRecuesPage extends StatelessWidget {
   const CommandesRecuesPage({super.key});
 
@@ -94,7 +95,16 @@ class _CarteCommande extends StatelessWidget {
           label: 'Commande prête',
           prochainStatut: StatutCommande.prete,
         );
-      case StatutCommande.livreurAssigne:
+        case StatutCommande.prete:
+        // Le bouton n'apparaît que si un livreur a accepté la mission
+        if (commande.livreurId == null || commande.livreurId!.isEmpty) {
+          return null;
+        }
+        return (
+          label: 'Commande récupérée',
+          prochainStatut: StatutCommande.recuperee,
+        );
+      case StatutCommande.livreurAssigne: // anciennes commandes de test
         return (
           label: 'Commande récupérée',
           prochainStatut: StatutCommande.recuperee,
@@ -172,6 +182,13 @@ class _CarteCommande extends StatelessWidget {
                     .mettreAJourStatut(commande.id, action.prochainStatut),
                 child: Text(action.label),
               ),
+            ),
+          ],
+          if (commande.statut == StatutCommande.prete && action == null) ...[
+            const SizedBox(height: 12),
+            const Text(
+              "Aucun livreur n'a encore accepté cette commande",
+              style: TextStyle(fontSize: 13, color: AppColors.brunClair),
             ),
           ],
         ],
