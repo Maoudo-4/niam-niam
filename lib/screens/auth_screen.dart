@@ -51,12 +51,17 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_modeInscription ? 'Inscription' : 'Connexion')),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+            Image.asset(
+              'assets/images/logo.png',
+              height: 200,
+            ),
+            const SizedBox(height: 24),
             if (_modeInscription)
               TextField(
                 controller: _nomController,
@@ -65,7 +70,10 @@ class _AuthScreenState extends State<AuthScreen> {
             const SizedBox(height: 16),
             TextField(
               controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                prefixIcon: Icon(Icons.email_outlined, color: Color(0xFF0072CE)),
+              ),
               keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 16), // marge entre email et mot de passe
@@ -77,6 +85,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 suffixIcon: IconButton(
                   icon: Icon(
                     _motDePasseCache ? Icons.visibility_off : Icons.visibility,
+                    color: const Color(0xFF0072CE),
                   ),
                   onPressed: () =>
                       setState(() => _motDePasseCache = !_motDePasseCache),
@@ -89,23 +98,40 @@ class _AuthScreenState extends State<AuthScreen> {
             const SizedBox(height: 10),
             _chargement
                 ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0072CE), // bleu de la barre du haut
-                      foregroundColor: Colors.white,
+                : SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE4202E), // rouge de la maquette
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      onPressed: _soumettre,
+                      child: Text(
+                        _modeInscription ? "S'inscrire" : 'Se connecter',
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
                     ),
-                    onPressed: _soumettre,
-                    child: Text(_modeInscription ? "S'inscrire" : 'Se connecter'),
                   ),
+            const SizedBox(height: 12),
             TextButton(
               onPressed: () => setState(() => _modeInscription = !_modeInscription),
-              child: Text(_modeInscription
-                  ? 'Déjà un compte ? Se connecter'
-                  : "Pas de compte ? S'inscrire"),
+              child: Text(
+                _modeInscription
+                    ? 'Déjà un compte ? Se connecter'
+                    : "Pas de compte ? S'inscrire",
+                style: const TextStyle(
+                    fontSize: 14, fontWeight: FontWeight.w600),
+              ),
             ),
           ],
         ),
       ),
+    ),
     );
   }
 }
