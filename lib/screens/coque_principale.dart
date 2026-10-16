@@ -12,6 +12,8 @@ import 'carte_etablissements_page.dart';
 
 /// Les trois rôles de l'appli.
 enum RoleUtilisateur { client, gerant, livreur }
+/// Permet à n'importe quelle page de changer l'onglet de la coque.
+final ValueNotifier<int> ongletActif = ValueNotifier<int>(0);
 
 class CoquePrincipale extends StatefulWidget {
   final RoleUtilisateur role;
@@ -24,6 +26,23 @@ class CoquePrincipale extends StatefulWidget {
 class _CoquePrincipaleState extends State<CoquePrincipale> {
   // 0 = Accueil, 1 = Restaurants, 2 = Commandes, 3 = Profil
   int _index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    ongletActif.value = 0;
+    ongletActif.addListener(_surChangementOnglet);
+  }
+
+  void _surChangementOnglet() {
+    if (mounted) setState(() => _index = ongletActif.value);
+  }
+
+  @override
+  void dispose() {
+    ongletActif.removeListener(_surChangementOnglet);
+    super.dispose();
+  }
 
   // L'onglet Commandes est la seule page qui change selon le rôle.
   Widget _pageCommandes() => switch (widget.role) {
@@ -44,7 +63,7 @@ class _CoquePrincipaleState extends State<CoquePrincipale> {
     return IconButton(
       icon: Icon(icone,
           color: actif ? AppColors.terracotta : AppColors.brunClair),
-      onPressed: () => setState(() => _index = index),
+      onPressed: () => ongletActif.value = index,
     );
   }
 
