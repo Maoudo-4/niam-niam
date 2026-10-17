@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'NIAM-NIAM',
+      title: 'Niam-Niam',
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
       home: const RedirectionPrincipale(),
