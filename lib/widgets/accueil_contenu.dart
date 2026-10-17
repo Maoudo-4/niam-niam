@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'section_top.dart';
 
 class AccueilContenu extends StatelessWidget {
@@ -13,41 +13,31 @@ class AccueilContenu extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Qu\'est-ce qu\'on mange aujourd\'hui ?',
-            style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.brunTexte)),
-        const SizedBox(height: 20),
-
-        const Text('Catégories',
-            style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: AppColors.brunTexte)),
-        const SizedBox(height: 12),
         Row(
           children: [
             _CategoriePastille(
               icone: Icons.restaurant,
               label: 'Restaurant',
+              couleur: const Color(0xFF0072CE), // bleu
               onTap: () => onVoirTout('restaurant'),
             ),
             const SizedBox(width: 12),
             _CategoriePastille(
               icone: Icons.lunch_dining,
               label: 'Fast-food',
+              couleur: const Color(0xFFE8742A), // orange
               onTap: () => onVoirTout('fast-food'),
             ),
             const SizedBox(width: 12),
             _CategoriePastille(
-              icone: Icons.storefront,
+              icone: LucideIcons.cookingPot,
               label: 'Maïga',
+              couleur: const Color(0xFFE4202E), // rouge
               onTap: () => onVoirTout('maïga'),
             ),
           ],
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
 
         SectionTop(
           titre: 'Top Restaurants',
@@ -55,14 +45,14 @@ class AccueilContenu extends StatelessWidget {
           messageVide: 'Aucun restaurant pour le moment',
           onVoirTout: () => onVoirTout('restaurant'),
         ),
-        const SizedBox(height: 28),
+        const SizedBox(height: 16),
         SectionTop(
           titre: 'Top Fast Food',
           type: 'fast-food',
           messageVide: 'Aucun fast-food pour le moment',
           onVoirTout: () => onVoirTout('fast-food'),
         ),
-        const SizedBox(height: 28),
+        const SizedBox(height: 16),
         SectionTop(
           titre: 'Top Maïga',
           type: 'maïga',
@@ -77,38 +67,44 @@ class AccueilContenu extends StatelessWidget {
 class _CategoriePastille extends StatelessWidget {
   final IconData icone;
   final String label;
+  final Color couleur;
   final VoidCallback onTap;
   const _CategoriePastille({
     required this.icone,
     required this.label,
+    required this.couleur,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final forme = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(14),
-      side: const BorderSide(color: AppColors.bordure),
-    );
-
     return Expanded(
-      child: Material(
-        color: AppColors.carte,
-        shape: forme,
-        child: InkWell(
-          customBorder: forme,
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: Column(
-              children: [
-                Icon(icone, color: AppColors.terracotta, size: 22),
-                const SizedBox(height: 6),
-                Text(label,
-                    style: const TextStyle(
-                        fontSize: 12, color: AppColors.brunTexte)),
-              ],
-            ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Column(
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: couleur.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icone, color: couleur, size: 26),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF0072CE),
+                ),
+              ),
+            ],
           ),
         ),
       ),

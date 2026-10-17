@@ -9,6 +9,8 @@ import 'gerant/commandes_recues_page.dart';
 import 'client/profil_client_page.dart';
 import 'livreur/profil_livreur_page.dart';
 import 'carte_etablissements_page.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../services/role_actuel.dart';
 
 /// Les trois rôles de l'appli.
 enum RoleUtilisateur { client, gerant, livreur }
@@ -30,6 +32,7 @@ class _CoquePrincipaleState extends State<CoquePrincipale> {
   @override
   void initState() {
     super.initState();
+    estClientNotifier.value = widget.role == RoleUtilisateur.client;
     ongletActif.value = 0;
     ongletActif.addListener(_surChangementOnglet);
   }
@@ -58,12 +61,32 @@ class _CoquePrincipaleState extends State<CoquePrincipale> {
     RoleUtilisateur.livreur => const ProfilLivreurPage(),
   };
 
-  Widget _itemNav(IconData icone, int index) {
+  Widget _itemNav(IconData icone, String label, int index) {
     final actif = _index == index;
-    return IconButton(
-      icon: Icon(icone,
-          color: actif ? AppColors.terracotta : AppColors.brunClair),
-      onPressed: () => ongletActif.value = index,
+    final couleur = actif ? const Color(0xFF0072CE) : AppColors.brunClair;
+    return Expanded(
+      child: InkWell(
+        onTap: () => ongletActif.value = index,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icone, color: couleur, size: 24),
+            const SizedBox(height: 2),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: actif ? FontWeight.w600 : FontWeight.w400,
+                  color: couleur,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -91,25 +114,25 @@ class _CoquePrincipaleState extends State<CoquePrincipale> {
         MaterialPageRoute(builder: (_) => const CarteEtablissementsPage()),
         ),
         backgroundColor: AppColors.terracotta,
-        child: const Icon(Icons.location_searching,
+        child: const Icon(LucideIcons.mapPin,
             color: Colors.white, size: 20),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
-        height: 50,
+        height: 64,
         padding: EdgeInsets.zero,
         shape: const CircularNotchedRectangle(),
         notchMargin: 4,
         color: AppColors.carte,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _itemNav(Icons.home, 0),
-            _itemNav(Icons.storefront, 1),
-            const SizedBox(width: 40), // espace pour le bouton flottant
-            _itemNav(Icons.receipt_long, 2),
-            _itemNav(Icons.person, 3),
-          ],
+            children: [
+              _itemNav(Icons.home, 'Accueil', 0),
+              _itemNav(Icons.storefront, 'Établissements', 1),
+              const SizedBox(width: 56), // espace pour le bouton flottant
+              _itemNav(Icons.receipt_long, 'Commandes', 2),
+              _itemNav(Icons.person, 'Profil', 3),
+            ],
         ),
       ),
     );
