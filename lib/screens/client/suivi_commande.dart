@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../theme.dart';
 import '../../models/commande.dart';
 import '../../services/commande_service.dart';
+import '../../services/livreur_service.dart';
+import '../../services/appel_service.dart';
 
 class SuiviCommande extends StatelessWidget {
   final String commandeId;
@@ -194,21 +196,35 @@ class SuiviCommande extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: AppColors.bordure),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
-                        CircleAvatar(
+                        const CircleAvatar(
                           radius: 22,
                           backgroundColor: AppColors.creme,
                           child: Icon(Icons.person, color: AppColors.terracotta),
                         ),
-                        SizedBox(width: 12),
-                        Expanded(
+                        const SizedBox(width: 12),
+                        const Expanded(
                           child: Text('Ton livreur',
                               style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.brunTexte)),
                         ),
-                        Icon(Icons.call, color: AppColors.vert),
+                        IconButton(
+                          tooltip: 'Appeler le livreur',
+                          icon: const Icon(Icons.call, color: AppColors.vert),
+                          onPressed: () async {
+                            // Le numéro est dans le profil du livreur
+                            String numero = '';
+                            try {
+                              final livreur = await LivreurService()
+                                  .getProfil(commande.livreurId!);
+                              numero = livreur?.telephone ?? '';
+                            } catch (_) {}
+                            if (!context.mounted) return;
+                            await appeler(context, numero);
+                          },
+                        ),
                       ],
                     ),
                   ),

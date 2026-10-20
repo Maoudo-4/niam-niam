@@ -11,6 +11,7 @@ import 'livreur/profil_livreur_page.dart';
 import 'carte_etablissements_page.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../services/role_actuel.dart';
+import 'livreur/carte_livreur_page.dart';
 
 /// Les trois rôles de l'appli.
 enum RoleUtilisateur { client, gerant, livreur }
@@ -111,7 +112,11 @@ class _CoquePrincipaleState extends State<CoquePrincipale> {
       floatingActionButton: FloatingActionButton.small(
         onPressed: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => const CarteEtablissementsPage()),
+        MaterialPageRoute(
+          builder: (_) => widget.role == RoleUtilisateur.livreur
+              ? const CarteLivreurPage()
+              : const CarteEtablissementsPage(),
+        ),
         ),
         backgroundColor: AppColors.terracotta,
         child: const Icon(LucideIcons.mapPin,
@@ -130,7 +135,11 @@ class _CoquePrincipaleState extends State<CoquePrincipale> {
               _itemNav(Icons.home, 'Accueil', 0),
               _itemNav(Icons.storefront, 'Établissements', 1),
               const SizedBox(width: 56), // espace pour le bouton flottant
-              _itemNav(Icons.receipt_long, 'Commandes', 2),
+              _itemNav(        
+                widget.role == RoleUtilisateur.livreur ? Icons.delivery_dining : Icons.receipt_long,
+                widget.role == RoleUtilisateur.livreur ? 'Missions' : 'Commandes',
+                2,
+              ),
               _itemNav(Icons.person, 'Profil', 3),
             ],
         ),

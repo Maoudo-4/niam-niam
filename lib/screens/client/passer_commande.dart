@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:latlong2/latlong.dart'; // NOUVEAU
 import '../../models/commande.dart';
 import '../../models/etablissement.dart';
 import '../../models/produit.dart';
 import '../../services/commande_service.dart';
 import '../../services/produit_service.dart';
 import '../../theme.dart';
+import 'choisir_position_page.dart'; // NOUVEAU
 import 'suivi_commande.dart';
 
 class PasserCommande extends StatefulWidget {
@@ -23,6 +25,29 @@ class _PasserCommandeState extends State<PasserCommande> {
   // Quantité choisie par produit (clé = produitId). Absent ou 0 = pas au panier.
   final Map<String, int> _quantites = {};
   bool _envoi = false;
+
+  // NOUVEAU : lieu de livraison et point de repère
+  LatLng? _positionLivraison;
+  final _repereController = TextEditingController();
+
+  // NOUVEAU
+  @override
+  void dispose() {
+    _repereController.dispose();
+    super.dispose();
+  }
+
+  // NOUVEAU : ouvre l'écran de choix de position et récupère le résultat
+  Future<void> _choisirPosition() async {
+    final resultat = await Navigator.push<LatLng>(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            ChoisirPositionPage(positionInitiale: _positionLivraison),
+      ),
+    );
+    if (resultat != null) setState(() => _positionLivraison = resultat);
+  }
 
   int _quantite(String produitId) => _quantites[produitId] ?? 0;
 
@@ -47,7 +72,7 @@ class _PasserCommandeState extends State<PasserCommande> {
 
   Future<void> _payer(List<Produit> produits) async {
     final lignes = _construireLignes(produits);
-    if (lignes.isEmpty) return;
+    if (lignes.isEmpty || _positionLivraison == null) return; // MODIFIÉ
 
     setState(() => _envoi = true);
     final uid = FirebaseAuth.instance.currentUser!.uid;
@@ -56,6 +81,9 @@ class _PasserCommandeState extends State<PasserCommande> {
       clientId: uid,
       etablissementId: widget.etablissement.id,
       lignes: lignes,
+      latitudeLivraison: _positionLivraison!.latitude, // NOUVEAU
+      longitudeLivraison: _positionLivraison!.longitude, // NOUVEAU
+      repereLivraison: _repereController.text.trim(), // NOUVEAU
     );
 
     if (!mounted) return;
@@ -109,7 +137,7 @@ class _PasserCommandeState extends State<PasserCommande> {
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(color: AppColors.bordure),
                       ),
-                                            child: Row(
+                      child: Row(
                         children: [
                           Container(
                             width: 48,
@@ -162,6 +190,38 @@ class _PasserCommandeState extends State<PasserCommande> {
                   },
                 ),
               ),
+
+              // NOUVEAU : bloc lieu de livraison + point de repère
+              Container(
+                color: AppColors.carte,
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _choisirPosition,
+                        icon: Icon(_positionLivraison == null
+                            ? Icons.location_on_outlined
+                            : Icons.check_circle),
+                        label: Text(_positionLivraison == null
+                            ? 'Choisir le lieu de livraison'
+                            : 'Lieu de livraison choisi ✓ (modifier)'),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _repereController,
+                      decoration: const InputDecoration(
+                        hintText:
+                            'Point de repère (ex : en face de la pharmacie)',
+                        prefixIcon: Icon(Icons.flag_outlined),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -193,7 +253,9 @@ class _PasserCommandeState extends State<PasserCommande> {
                         child: _envoi
                             ? const Center(child: CircularProgressIndicator())
                             : ElevatedButton(
-                                onPressed: nombreArticles > 0
+                                // MODIFIÉ : exige aussi la position
+                                onPressed: (nombreArticles > 0 &&
+                                        _positionLivraison != null)
                                     ? () => _payer(produits)
                                     : null,
                                 child: Text('Payer ($nombreArticles)'),
