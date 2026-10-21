@@ -16,11 +16,13 @@ class _PointCarte {
   final String titre;
   final String details;
   final bool estClient;
+  final IconData icone;
   _PointCarte({
     required this.position,
     required this.titre,
     required this.details,
     required this.estClient,
+    required this.icone,
   });
 }
 
@@ -61,6 +63,7 @@ class _CarteLivreurPageState extends State<CarteLivreurPage> {
               ? 'Repère : ${c.repereLivraison}'
               : c.description,
           estClient: true,
+          icone: Icons.home,
         ));
       } else {
         // Assignée ou récupérée : on affiche le resto
@@ -73,10 +76,29 @@ class _CarteLivreurPageState extends State<CarteLivreurPage> {
           titre: e.nom,
           details: 'À récupérer : ${c.description}',
           estClient: false,
+          icone: iconePourType(e.type),
         ));
       }
     }
     return points;
+  }
+
+  Widget _marqueur(_PointCarte p) {
+    final selectionne = _memePoint(_selectionne, p);
+    final couleur =
+        p.estClient ? const Color(0xFF0072CE) : AppColors.terracotta;
+    return Container(
+      decoration: BoxDecoration(
+        color: selectionne ? couleur : Colors.white,
+        shape: BoxShape.circle,
+        border: Border.all(color: couleur, width: 2),
+        boxShadow: const [
+          BoxShadow(color: Colors.black26, blurRadius: 4),
+        ],
+      ),
+      child: Icon(p.icone,
+          size: 16, color: selectionne ? Colors.white : couleur),
+    );
   }
 
   Future<void> _ouvrirItineraire(LatLng p) async {
@@ -142,17 +164,11 @@ class _CarteLivreurPageState extends State<CarteLivreurPage> {
                           for (final p in points)
                             Marker(
                               point: p.position,
-                              width: 42,
-                              height: 42,
+                              width: 32,
+                              height: 32,
                               child: GestureDetector(
                                 onTap: () => setState(() => _selectionne = p),
-                                child: Icon(
-                                  Icons.location_on,
-                                  color: _memePoint(_selectionne, p)
-                                      ? AppColors.terracotta
-                                      : AppColors.brunTexte,
-                                  size: 42,
-                                ),
+                                child: _marqueur(p),
                               ),
                             ),
                         ],
