@@ -8,6 +8,7 @@ import '../../widgets/confirmer_deconnexion.dart';
 import '../client/changer_mot_de_passe_screen.dart';
 import 'historique_livraisons_page.dart';
 import 'modifier_profil_livreur_screen.dart';
+import '../../services/support_service.dart';
 
 const _bleu = Color(0xFF0072CE);
 const _rouge = Color(0xFFE4202E);
@@ -226,13 +227,16 @@ class _ProfilLivreurPageState extends State<ProfilLivreurPage> {
                       _LigneMenu(
                         icone: LucideIcons.circleHelp,
                         titre: 'Aide et assistance',
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const _PageBientot(
-                                titre: 'Aide et assistance'),
-                          ),
-                        ),
+                        onTap: () async {
+                          final ok = await SupportService.contacterSupport();
+                          if (!ok && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content:
+                                      Text('Impossible d\'ouvrir WhatsApp')),
+                            );
+                          }
+                        },
                       ),
                       const SizedBox(height: 4),
                     ],

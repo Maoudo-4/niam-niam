@@ -9,6 +9,7 @@ import 'modifier_profil_client_screen.dart';
 import 'changer_mot_de_passe_screen.dart';
 import 'favoris_client_page.dart';
 import 'historique_commandes_page.dart';
+import '../../services/support_service.dart';
 
 const _bleu = Color(0xFF0072CE);
 const _rouge = Color(0xFFE4202E);
@@ -41,14 +42,6 @@ class _ProfilClientPageState extends State<ProfilClientPage> {
     final p = c.prenom.isNotEmpty ? c.prenom[0] : '';
     final n = c.nom.isNotEmpty ? c.nom[0] : '';
     return '$p$n'.toUpperCase();
-  }
-
-  // Provisoire : les sous-pages arrivent une par une
-  void _ouvrirBientot(String titre) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => _PageBientot(titre: titre)),
-    );
   }
 
   // Ouvre le formulaire de modification ; au retour, recharge le profil
@@ -231,7 +224,16 @@ class _ProfilClientPageState extends State<ProfilClientPage> {
                       _LigneMenu(
                         icone: LucideIcons.circleHelp,
                         titre: 'Aide et assistance',
-                        onTap: () => _ouvrirBientot('Aide et assistance'),
+                        onTap: () async {
+                          final ok = await SupportService.contacterSupport();
+                          if (!ok && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content:
+                                      Text('Impossible d\'ouvrir WhatsApp')),
+                            );
+                          }
+                        },
                       ),
                       const SizedBox(height: 4),
                     ],

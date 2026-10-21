@@ -10,6 +10,7 @@ import 'plats_etablissement_page.dart';
 import 'modifier_etablissement_screen.dart';
 import 'historique_commandes_gerant_page.dart';
 import 'statistiques_gerant_page.dart';
+import '../../services/support_service.dart';
 
 const _bleu = Color(0xFF0072CE);
 const _rouge = Color(0xFFE4202E);
@@ -73,14 +74,6 @@ class _ProfilGerantPageState extends State<ProfilGerantPage> {
         const SnackBar(content: Text('✅ Mot de passe modifié')),
       );
     }
-  }
-
-  // Provisoire : l'aide arrive plus tard
-  void _ouvrirBientot(String titre) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => _PageBientot(titre: titre)),
-    );
   }
 
   @override
@@ -248,7 +241,16 @@ class _ProfilGerantPageState extends State<ProfilGerantPage> {
                         _LigneMenu(
                           icone: LucideIcons.circleHelp,
                           titre: 'Aide et assistance',
-                          onTap: () => _ouvrirBientot('Aide et assistance'),
+                          onTap: () async {
+                            final ok = await SupportService.contacterSupport();
+                            if (!ok && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content:
+                                        Text('Impossible d\'ouvrir WhatsApp')),
+                              );
+                            }
+                          },
                         ),
                         const SizedBox(height: 4),
                       ],
