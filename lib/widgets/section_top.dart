@@ -26,21 +26,24 @@ class SectionTop extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(titre,
+              Text(titre,
                 style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.brunTexte)),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF0072CE))),
             GestureDetector(
               onTap: onVoirTout,
-              child: const Text('Voir tout',
-                  style: TextStyle(fontSize: 13, color: AppColors.vert)),
+                child: const Text('Voir tout',
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF0072CE))),
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         SizedBox(
-          height: 170,
+          height: 108,
           child: StreamBuilder<List<Etablissement>>(
             stream: EtablissementService().getEtablissements(),
             builder: (context, snapshot) {

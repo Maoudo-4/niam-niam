@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class AppColors {
   static const brunFonce = Color(0xFF0072CE); // bleu Sonic (structure, AppBar)
@@ -40,8 +41,8 @@ IconData iconePourType(String type) {
       return Icons.restaurant;
     case 'fast-food':
       return Icons.lunch_dining;
-    case 'maiga':
-      return Icons.storefront;
+    case 'maïga':
+      return LucideIcons.cookingPot;
     default:
       return Icons.fastfood;
   }

@@ -14,7 +14,7 @@ class AccueilPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('NIAM-NIAM'),
+        title: const Text('Niam-Niam'),
         actions: [
           IconButton(
             tooltip: 'Rechercher',
@@ -28,7 +28,7 @@ class AccueilPage extends StatelessWidget {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
         child: AccueilContenu(onVoirTout: onVoirTout),
       ),
     );

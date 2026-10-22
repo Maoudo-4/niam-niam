@@ -9,9 +9,14 @@ import 'gerant/commandes_recues_page.dart';
 import 'client/profil_client_page.dart';
 import 'livreur/profil_livreur_page.dart';
 import 'carte_etablissements_page.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../services/role_actuel.dart';
+import 'livreur/carte_livreur_page.dart';
 
 /// Les trois rôles de l'appli.
 enum RoleUtilisateur { client, gerant, livreur }
+/// Permet à n'importe quelle page de changer l'onglet de la coque.
+final ValueNotifier<int> ongletActif = ValueNotifier<int>(0);
 
 class CoquePrincipale extends StatefulWidget {
   final RoleUtilisateur role;
@@ -24,6 +29,24 @@ class CoquePrincipale extends StatefulWidget {
 class _CoquePrincipaleState extends State<CoquePrincipale> {
   // 0 = Accueil, 1 = Restaurants, 2 = Commandes, 3 = Profil
   int _index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    estClientNotifier.value = widget.role == RoleUtilisateur.client;
+    ongletActif.value = 0;
+    ongletActif.addListener(_surChangementOnglet);
+  }
+
+  void _surChangementOnglet() {
+    if (mounted) setState(() => _index = ongletActif.value);
+  }
+
+  @override
+  void dispose() {
+    ongletActif.removeListener(_surChangementOnglet);
+    super.dispose();
+  }
 
   // L'onglet Commandes est la seule page qui change selon le rôle.
   Widget _pageCommandes() => switch (widget.role) {
@@ -39,12 +62,32 @@ class _CoquePrincipaleState extends State<CoquePrincipale> {
     RoleUtilisateur.livreur => const ProfilLivreurPage(),
   };
 
-  Widget _itemNav(IconData icone, int index) {
+  Widget _itemNav(IconData icone, String label, int index) {
     final actif = _index == index;
-    return IconButton(
-      icon: Icon(icone,
-          color: actif ? AppColors.terracotta : AppColors.brunClair),
-      onPressed: () => setState(() => _index = index),
+    final couleur = actif ? const Color(0xFF0072CE) : AppColors.brunClair;
+    return Expanded(
+      child: InkWell(
+        onTap: () => ongletActif.value = index,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icone, color: couleur, size: 24),
+            const SizedBox(height: 2),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: actif ? FontWeight.w600 : FontWeight.w400,
+                  color: couleur,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -69,28 +112,36 @@ class _CoquePrincipaleState extends State<CoquePrincipale> {
       floatingActionButton: FloatingActionButton.small(
         onPressed: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => const CarteEtablissementsPage()),
+        MaterialPageRoute(
+          builder: (_) => widget.role == RoleUtilisateur.livreur
+              ? const CarteLivreurPage()
+              : const CarteEtablissementsPage(),
+        ),
         ),
         backgroundColor: AppColors.terracotta,
-        child: const Icon(Icons.location_searching,
+        child: const Icon(LucideIcons.mapPin,
             color: Colors.white, size: 20),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
-        height: 50,
+        height: 64,
         padding: EdgeInsets.zero,
         shape: const CircularNotchedRectangle(),
         notchMargin: 4,
         color: AppColors.carte,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _itemNav(Icons.home, 0),
-            _itemNav(Icons.storefront, 1),
-            const SizedBox(width: 40), // espace pour le bouton flottant
-            _itemNav(Icons.receipt_long, 2),
-            _itemNav(Icons.person, 3),
-          ],
+            children: [
+              _itemNav(Icons.home, 'Accueil', 0),
+              _itemNav(Icons.storefront, 'Établissements', 1),
+              const SizedBox(width: 56), // espace pour le bouton flottant
+              _itemNav(        
+                widget.role == RoleUtilisateur.livreur ? Icons.delivery_dining : Icons.receipt_long,
+                widget.role == RoleUtilisateur.livreur ? 'Missions' : 'Commandes',
+                2,
+              ),
+              _itemNav(Icons.person, 'Profil', 3),
+            ],
         ),
       ),
     );

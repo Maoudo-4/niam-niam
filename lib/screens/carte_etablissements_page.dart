@@ -156,19 +156,32 @@ class _CarteEtablissementsPageState extends State<CarteEtablissementsPage> {
                   for (final e in _etablissements)
                     Marker(
                       point: LatLng(e.latitude, e.longitude),
-                      width: 42,
-                      height: 42,
+                      width: 32,
+                      height: 32,
                       child: GestureDetector(
                         onTap: () => setState(() => _selectionne = e),
-                        child: Icon(
-                          Icons.location_on,
-                          color: _selectionne?.id == e.id
-                              ? AppColors.terracotta
-                              : AppColors.brunTexte,
-                          size: 42,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: _selectionne?.id == e.id
+                                ? AppColors.terracotta
+                                : Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                                color: AppColors.terracotta, width: 2),
+                            boxShadow: const [
+                              BoxShadow(color: Colors.black26, blurRadius: 4),
+                            ],
+                          ),
+                          child: Icon(
+                            iconePourType(e.type),
+                            size: 16,
+                            color: _selectionne?.id == e.id
+                                ? Colors.white
+                                : AppColors.terracotta,
+                          ),
                         ),
-                      ),
                     ),
+                  ),
                 ],
               ),
             ],
@@ -251,7 +264,7 @@ class _FicheFlottante extends StatelessWidget {
                   color: AppColors.terracotta.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.restaurant,
+                child: Icon(iconePourType(etablissement.type),
                     color: AppColors.terracotta, size: 24),
               ),
               const SizedBox(width: 14),

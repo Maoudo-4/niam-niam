@@ -11,6 +11,9 @@ class CommandeService {
     required String clientId,
     required String etablissementId,
     required List<LigneCommande> lignes,
+    double? latitudeLivraison,
+    double? longitudeLivraison,
+    String? repereLivraison,
   }) async {
     final montant = lignes.fold<double>(0, (total, l) => total + l.sousTotal);
 
@@ -20,6 +23,9 @@ class CommandeService {
       'lignes': lignes.map((l) => l.toMap()).toList(),
       'montant': montant,
       'statut': StatutCommande.confirmee,
+      'latitudeLivraison': latitudeLivraison,
+      'longitudeLivraison': longitudeLivraison,
+      'repereLivraison': repereLivraison,
       'createdAt': FieldValue.serverTimestamp(),
     });
     // Prévient le gérant, sans bloquer la commande si l'envoi échoue
@@ -87,6 +93,7 @@ class CommandeService {
             .toList()
           ..sort((a, b) => a.createdAt.compareTo(b.createdAt)));
   }
+
   // Faire avancer le statut (utilisé plus tard côté gérant/livreur)
   Future<void> mettreAJourStatut(String commandeId, String nouveauStatut) async {
     await _db.collection('commandes').doc(commandeId).update({
@@ -99,6 +106,7 @@ class CommandeService {
       debugPrint('Notification non envoyée : $e');
     }
   }
+
   Future<void> supprimerCommande(String commandeId) async {
     await _db.collection('commandes').doc(commandeId).delete();
   }

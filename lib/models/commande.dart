@@ -7,6 +7,9 @@ class Commande {
   final String statut;
   final String? livreurId; // null tant qu'aucun livreur n'est assigné
   final DateTime createdAt;
+  final double? latitudeLivraison;
+  final double? longitudeLivraison;
+  final String? repereLivraison;
 
   /// Ancien champ texte libre, gardé pour les commandes créées avant
   /// l'introduction du panier multi-plats (elles n'ont pas de "lignes").
@@ -21,6 +24,9 @@ class Commande {
     required this.statut,
     this.livreurId,
     required this.createdAt,
+    this.latitudeLivraison,
+    this.longitudeLivraison,
+    this.repereLivraison,
     String? descriptionHeritee,
   }) : _descriptionHeritee = descriptionHeritee;
 
@@ -43,6 +49,9 @@ class Commande {
       'statut': statut,
       'livreurId': livreurId,
       'createdAt': createdAt,
+      'latitudeLivraison': latitudeLivraison,
+      'longitudeLivraison': longitudeLivraison,
+      'repereLivraison': repereLivraison,
     };
   }
 
@@ -58,6 +67,9 @@ class Commande {
       statut: map['statut'] ?? StatutCommande.confirmee,
       livreurId: map['livreurId'],
       createdAt: map['createdAt']?.toDate() ?? DateTime.now(),
+      latitudeLivraison: (map['latitudeLivraison'] as num?)?.toDouble(),
+      longitudeLivraison: (map['longitudeLivraison'] as num?)?.toDouble(),
+      repereLivraison: map['repereLivraison'] as String?,
       descriptionHeritee: map['description'] as String?,
     );
   }

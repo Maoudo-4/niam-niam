@@ -5,6 +5,7 @@ import '../models/app_notification.dart';
 import '../services/notification_service.dart';
 import '../theme.dart';
 import 'client/suivi_commande.dart';
+import 'coque_principale.dart';
 
 /// Liste des notifications de l'utilisateur connecté.
 class NotificationsPage extends StatefulWidget {
@@ -50,14 +51,20 @@ class _NotificationsPageState extends State<NotificationsPage> {
         await _service.marquerCommeLue(n.id);
       } catch (_) {}
     }
-    if (!mounted) return;
-    if (_estClient && n.commandeId != null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => SuiviCommande(commandeId: n.commandeId!),
-        ),
-      );
+        if (!mounted) return;
+    if (_estClient) {
+      if (n.commandeId != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => SuiviCommande(commandeId: n.commandeId!),
+          ),
+        );
+      }
+    } else {
+      // Gérant ou livreur : on bascule sur l'onglet Commandes de la coque
+      ongletActif.value = 2;
+      Navigator.pop(context);
     }
   }
 
