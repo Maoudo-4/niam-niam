@@ -4,6 +4,7 @@ import '../../models/commande.dart';
 import '../../services/commande_service.dart';
 import '../../services/livreur_service.dart';
 import '../../services/appel_service.dart';
+import '../../models/livreur.dart';
 
 class SuiviCommande extends StatelessWidget {
   final String commandeId;
@@ -204,11 +205,33 @@ class SuiviCommande extends StatelessWidget {
                           child: Icon(Icons.person, color: AppColors.terracotta),
                         ),
                         const SizedBox(width: 12),
-                        const Expanded(
-                          child: Text('Ton livreur',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.brunTexte)),
+                        Expanded(
+                          child: FutureBuilder<Livreur?>(
+                            future: LivreurService()
+                                .getProfil(commande.livreurId!),
+                            builder: (context, snap) {
+                              final livreur = snap.data;
+                              if (livreur == null) {
+                                return const Text('Ton livreur',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.brunTexte));
+                              }
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('${livreur.prenom} ${livreur.nom}',
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.brunTexte)),
+                                  const Text('Ton livreur',
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.brunClair)),
+                                ],
+                              );
+                            },
+                          ),
                         ),
                         IconButton(
                           tooltip: 'Appeler le livreur',
