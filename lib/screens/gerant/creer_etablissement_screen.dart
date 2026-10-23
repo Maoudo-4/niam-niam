@@ -184,9 +184,9 @@ class _CreerEtablissementScreenState
                 initialValue: _categoriePrix,
                 decoration: const InputDecoration(labelText: 'Catégorie de prix'),
                 items: const [
-                  DropdownMenuItem(value: 'FF', child: Text('FF — Économique')),
-                  DropdownMenuItem(value: 'FFFF', child: Text('FFFF — Moyen')),
-                  DropdownMenuItem(value: 'FFFFF', child: Text('FFFFF — Premium')),
+                  DropdownMenuItem(value: 'F', child: Text('F — Économique')),
+                  DropdownMenuItem(value: 'FF', child: Text('FF — Moyen')),
+                  DropdownMenuItem(value: 'FFF', child: Text('FFF — Premium')),
                 ],
                 onChanged: (v) => setState(() => _categoriePrix = v!),
               ),

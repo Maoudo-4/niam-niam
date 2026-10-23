@@ -8,6 +8,7 @@ import '../../theme.dart';
 import '../../widgets/carte_etablissement.dart' show couleurPourType;
 import '../../widgets/cloche_notifications.dart';
 import 'fiche_etablissement_screen.dart';
+import '../recherche_page.dart';
 
 const _bleu = Color(0xFF0072CE);
 
@@ -31,7 +32,17 @@ class ListeEtablissementsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(_titre),
-        actions: const [ClocheNotifications()],
+        actions: [
+          IconButton(
+            tooltip: 'Rechercher',
+            icon: const Icon(Icons.search),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const RecherchePage()),
+            ),
+          ),
+          const ClocheNotifications(),
+        ],
       ),
       body: StreamBuilder<List<Etablissement>>(
         stream: service.getEtablissements(),
