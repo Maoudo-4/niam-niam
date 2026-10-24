@@ -10,7 +10,7 @@ import 'plats_etablissement_page.dart';
 import 'modifier_etablissement_screen.dart';
 import 'historique_commandes_gerant_page.dart';
 import 'statistiques_gerant_page.dart';
-import '../../services/support_service.dart';
+import '../aide_assistance_page.dart';
 
 const _bleu = Color(0xFF0072CE);
 const _rouge = Color(0xFFE4202E);
@@ -241,16 +241,12 @@ class _ProfilGerantPageState extends State<ProfilGerantPage> {
                         _LigneMenu(
                           icone: LucideIcons.circleHelp,
                           titre: 'Aide et assistance',
-                          onTap: () async {
-                            final ok = await SupportService.contacterSupport();
-                            if (!ok && context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content:
-                                        Text('Impossible d\'ouvrir WhatsApp')),
-                              );
-                            }
-                          },
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AideAssistancePage(),
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 4),
                       ],
