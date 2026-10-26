@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/etablissement.dart';
 import '../../services/etablissement_service.dart';
+import 'package:geolocator/geolocator.dart';
 
 /// Formulaire de modification de l'établissement (prérempli).
 /// Se ferme avec `true` quand les modifications sont enregistrées.
@@ -23,6 +24,9 @@ class _ModifierEtablissementScreenState
   late final TextEditingController _adresseController;
   late String _type;
   late String _categoriePrix;
+  late double _latitude;
+  late double _longitude;
+  bool _localisationEnCours = false;
 
   bool _enCours = false;
   String? _message;
@@ -36,6 +40,8 @@ class _ModifierEtablissementScreenState
     _adresseController = TextEditingController(text: e.adresse);
     _type = e.type;
     _categoriePrix = e.categoriePrix;
+    _latitude = e.latitude;
+    _longitude = e.longitude;
   }
 
   @override
@@ -44,6 +50,47 @@ class _ModifierEtablissementScreenState
     _descriptionController.dispose();
     _adresseController.dispose();
     super.dispose();
+  }
+
+  Future<void> _utiliserMaPosition() async {
+    setState(() => _localisationEnCours = true);
+
+    try {
+      final serviceActif = await Geolocator.isLocationServiceEnabled();
+      if (!serviceActif) {
+        throw Exception('Activez la localisation sur votre appareil');
+      }
+
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        throw Exception('Permission de localisation refusée');
+      }
+
+      final position = await Geolocator.getCurrentPosition();
+      if (!mounted) return;
+      setState(() {
+        _latitude = position.latitude;
+        _longitude = position.longitude;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              '✅ Position récupérée : ${position.latitude.toStringAsFixed(5)}, '
+              '${position.longitude.toStringAsFixed(5)}'),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('❌ $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _localisationEnCours = false);
+    }
   }
 
   Future<void> _enregistrer() async {
@@ -62,8 +109,8 @@ class _ModifierEtablissementScreenState
         type: _type,
         description: _descriptionController.text.trim(),
         adresse: _adresseController.text.trim(),
-        latitude: e.latitude,
-        longitude: e.longitude,
+        latitude: _latitude,
+        longitude: _longitude,
         categoriePrix: _categoriePrix,
         photoUrl: e.photoUrl,
         noteMoyenne: e.noteMoyenne,
@@ -101,6 +148,22 @@ class _ModifierEtablissementScreenState
                     const InputDecoration(labelText: 'Nom de l\'établissement'),
                 validator: (v) =>
                     v == null || v.trim().isEmpty ? 'Nom requis' : null,
+              ),
+              //const SizedBox(height: 16),
+
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: _localisationEnCours ? null : _utiliserMaPosition,
+                icon: _localisationEnCours
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.my_location),
+                label: Text(_localisationEnCours
+                    ? 'Localisation en cours...'
+                    : 'Position mise à jour ✓ (touchez pour actualiser)'),
               ),
               const SizedBox(height: 16),
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../models/etablissement.dart';
 import '../../services/etablissement_service.dart';
+import 'package:geolocator/geolocator.dart';
 
 class CreerEtablissementScreen extends StatefulWidget {
   final VoidCallback? onEtablissementCree;
@@ -13,7 +14,7 @@ class CreerEtablissementScreen extends StatefulWidget {
 }
 
 class _CreerEtablissementScreenState
-    extends State<CreerEtablissementScreen> {
+  extends State<CreerEtablissementScreen> {
   final _formKey = GlobalKey<FormState>();
   final EtablissementService _service = EtablissementService();
 
@@ -23,6 +24,9 @@ class _CreerEtablissementScreenState
 
   String _type = 'restaurant';
   String _categoriePrix = 'FF';
+  double? _latitude;
+  double? _longitude;
+  bool _localisationEnCours = false;
   bool _enCours = false;
   String? _message;
 
@@ -32,6 +36,40 @@ class _CreerEtablissementScreenState
     _descriptionController.dispose();
     _adresseController.dispose();
     super.dispose();
+  }
+
+    Future<void> _utiliserMaPosition() async {
+    setState(() => _localisationEnCours = true);
+
+    try {
+      // Vérifie que la localisation est activée sur l'appareil
+      final serviceActif = await Geolocator.isLocationServiceEnabled();
+      if (!serviceActif) {
+        throw Exception('Activez la localisation sur votre appareil');
+      }
+
+      // Vérifie/demande la permission
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        throw Exception('Permission de localisation refusée');
+      }
+
+      final position = await Geolocator.getCurrentPosition();
+      if (!mounted) return;
+      setState(() {
+        _latitude = position.latitude;
+        _longitude = position.longitude;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _message = '❌ $e');
+    } finally {
+      if (mounted) setState(() => _localisationEnCours = false);
+    }
   }
 
   Future<void> _creerEtablissement() async {
@@ -57,8 +95,8 @@ class _CreerEtablissementScreenState
         type: _type,
         description: _descriptionController.text.trim(),
         adresse: _adresseController.text.trim(),
-        latitude: 0.0, // TODO: à remplacer par la géolocalisation réelle
-        longitude: 0.0,
+        latitude: _latitude ?? 0.0,
+        longitude: _longitude ?? 0.0,
         categoriePrix: _categoriePrix,
         photoUrl: '',
         proprietaireId: uid,
@@ -126,14 +164,29 @@ class _CreerEtablissementScreenState
                     v == null || v.trim().isEmpty ? 'Adresse requise' : null,
               ),
               const SizedBox(height: 12),
+            
+              OutlinedButton.icon(
+                onPressed: _localisationEnCours ? null : _utiliserMaPosition,
+                icon: _localisationEnCours
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.my_location),
+                label: Text(_latitude == null
+                    ? 'Utiliser ma position actuelle'
+                    : 'Position enregistrée ✓'),
+              ),
+              const SizedBox(height: 12),
 
               DropdownButtonFormField<String>(
                 initialValue: _categoriePrix,
                 decoration: const InputDecoration(labelText: 'Catégorie de prix'),
                 items: const [
-                  DropdownMenuItem(value: 'FF', child: Text('FF — Économique')),
-                  DropdownMenuItem(value: 'FFFF', child: Text('FFFF — Moyen')),
-                  DropdownMenuItem(value: 'FFFFF', child: Text('FFFFF — Premium')),
+                  DropdownMenuItem(value: 'F', child: Text('F — Économique')),
+                  DropdownMenuItem(value: 'FF', child: Text('FF — Moyen')),
+                  DropdownMenuItem(value: 'FFF', child: Text('FFF — Premium')),
                 ],
                 onChanged: (v) => setState(() => _categoriePrix = v!),
               ),

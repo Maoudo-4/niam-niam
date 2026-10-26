@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/accueil_contenu.dart';
+import '../widgets/cloche_notifications.dart';
+import 'recherche_page.dart';
 
 /// Page d'accueil commune aux trois rôles (onglet Accueil de la coque).
 class AccueilPage extends StatelessWidget {
@@ -12,10 +14,21 @@ class AccueilPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('NIAM-NIAM'),
+        title: const Text('Niam-Niam'),
+        actions: [
+          IconButton(
+            tooltip: 'Rechercher',
+            icon: const Icon(Icons.search),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const RecherchePage()),
+            ),
+          ),
+          const ClocheNotifications(),
+        ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
         child: AccueilContenu(onVoirTout: onVoirTout),
       ),
     );
