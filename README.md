@@ -98,7 +98,11 @@ flutter run
 | Système de livraison (statuts, missions, GPS) | Maoudo et Moussa |
 
 Le détail est dans la partie 6 du rapport.
+| Auth + profils (client/gérant/livreur) | Moussa |
+| Établissements + fil d'actualité + recherche | Moussa + Maoudo |
+| Commande + paiement | Maoudo |
+| Système de livraison (statuts, pool, GPS) | Maoudo + Moussa |
 
-## 📄 Licence
+## @all right reserved | @Droit d'auteur
 
 Projet académique — UFR SAT, Université Gaston Berger de Saint-Louis.
